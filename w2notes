@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+
+use FindBin;
+use lib	"$FindBin::RealBin/.";
+
+use strict;
+use warnings;
+use feature qw/ say /;
+
+use File::Spec::Functions qw/ catfile /;
+
+use NotesConfig;
+use Subroutines;
+
+chdir $FindBin::RealBin;
+
+my $cmd = shift;
+my @args = @ARGV;
+
+
+{
+	last unless $cmd =~ m|^$_CONF{edit_proto}://|;
+
+	$cmd =~ s|$_CONF{edit_proto}://||;
+	$cmd = url_decode($cmd);
+
+	system($_CONF{'editor'}, catfile($_CONF{'root'},$cmd));
+	exec('perl scripts/update.pl');
+}
+
+my %actions = (
+	'start'   => sub {
+		system('perl scripts/checkTables.pl');
+		system('perl scripts/update.pl');
+		exec('perl','Server.pm', $args[0] || $_CONF{'port'} || 8888 );
+	},
+	'stop'  => sub {
+		system('perl scripts/killServer.pl');
+	},
+	'update' => sub {
+		system('perl scripts/update.pl');
+	},
+	'status' => sub {
+		system('perl scripts/sayHello.pl');
+	}
+);
+
+defined $actions{$cmd} ?
+	&{$actions{$cmd}} :
+	say 'err ...';
+
+1;

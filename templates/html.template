@@ -1,0 +1,17 @@
+<%
+	use File::Spec::Functions qw/ catfile /;
+	my $url  = url_decode($_DATA->{'URL'});
+	   $url =~ s|^/html/||;
+	my $path = catfile($_CONF{'root'},$url);
+	my $doc  = Document->new($path);
+%>
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	</head>
+	<body>
+		<h1><% print $doc->title; %></h1>
+		<% print $doc->to_html; %>
+	</body>
+</html>

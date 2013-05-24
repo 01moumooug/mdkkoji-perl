@@ -1,0 +1,9 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	</head>
+	<body>
+		<p>404 Not Found</p>
+		<p><a href="$_CONF{edit_proto}://$_DATA->{'URL'}">Create new one?</a></p>
+	</body>
+</html>
