@@ -105,7 +105,7 @@ Windows에서는 아직 제대로 돌아가지는 않지만, 업무상의 필요
 
 ### 문서 편집 ###
 
-문서 편집 기능은 따로 없습니다. 다만 설정 파일에서 설정한 임의 프로토콜과 편집용 프로그램을 연동하면 브라우저에서 바로 편집기를 띄우고 문서를 편집할 수 있을 것입니다. 제가 주로 사용하는 `iceweasel`에서는 `about:config`에 들어가 다음과 같은 두 `boolean` 항목을 추가하고, 편집 링크를 클릭해서 `w2notes`를  선택했습니다. 
+문서 편집 기능은 따로 없습니다. 다만 설정 파일에서 설정한 임의 프로토콜과 편집용 프로그램을 연동하면 브라우저에서 바로 편집기를 띄우고 문서를 편집할 수 있을 것입니다. 제가 주로 사용하는 Iceweasel에서는 `about:config`에 들어가 다음과 같은 두 `boolean` 항목을 추가하고, 편집 링크를 클릭해서 `w2notes`를  선택했습니다. 
 
 	network.protocol-handler.expose.edit      false
 	network.protocol-handler.external.edit    true
