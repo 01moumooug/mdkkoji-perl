@@ -30,7 +30,9 @@ Windows에서는 아직 제대로 돌아가지는 않지만, 업무상의 필요
 
 ### 분류용 필드 ###
 
-설정 파일인 `NotesConfig.pm`을 보면 `idx_fields`라는 항목에, 어떤 필드를 분류에 사용할지 정하는 부분이 있을 것입니다. 기본으로는 `Tags`가 포함돼 있습니다. 
+설정 파일 샘플인 `NotesConfig.sample.pm`을 복사해서 `NotesConfig.pm`을 만든다.
+
+`NotesConfig.pm`에 보면 `idx_fields`라는 항목에, 어떤 필드를 분류에 사용할지 정하는 부분이 있을 것입니다. 기본으로는 `Tags`가 포함돼 있습니다. 
 
 	'idx_fields' => [
 		['tags'  ,'(none)'],
