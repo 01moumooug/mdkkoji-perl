@@ -6,7 +6,7 @@ our %_CONF = (
 	# 노트 제목
 	'title'    => 'My Notes', 
 	# 루트 경로
-	'root'     => "$ENV{HOME}/w2notes", 
+	'root'     => "$ENV{HOME}/notes", 
 	# 마크다운 파일 확장자
 	'suffix'   => '.md', 
 	# db 파일 이름
