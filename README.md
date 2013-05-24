@@ -5,6 +5,10 @@ w2notes
 
 리눅스에서 Perl로 작성했고, Text::Markdown 모듈과 DBI모듈, DBD::SQLite 모듈이 있어야 합니다. 
 
+    sudo cpan Text::Markdown
+    sudo cpan DBI
+    sudo cpan DBD::SQLite
+
 Windows에서는 아직 제대로 돌아가지는 않지만, 업무상의 필요로 인하여 돌아가게 만드려 합니다.
 
 사용법
