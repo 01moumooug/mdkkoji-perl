@@ -7,7 +7,7 @@ use feature qw/ say switch /;
 use IO::Socket;
 use Socket qw/ :crlf /;
 use Cwd    qw/ abs_path /;
-
+use File::Spec::Functions qw/ catpath /;
 use NotesConfig;
 use Subroutines;
 use Document;
@@ -40,7 +40,7 @@ sub receptionist {
 		default {
 			
 			$file = url_decode($request->{'URL'});
-			$file = abs_path($_CONF{'root'}.$file) || '';
+			$file = $_CONF{'root'}.$file;
 			$file = '' unless $file =~ /^\Q$_CONF{'root'}\E/;
 
 			if (-e $file) {
