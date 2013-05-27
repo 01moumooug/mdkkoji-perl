@@ -98,7 +98,7 @@ while (1) {
 				}
 
 			} else {
-				push @trash, $socket unless ( $! == EAGAIN() );
+				push @trash, $socket unless ( $! == EAGAIN );
 			}
 		}
 	}
@@ -113,7 +113,7 @@ while (1) {
 				push @reception, $socket;
 			}
 		} else {
-			push @trash, $socket unless ( $! == EAGAIN() );
+			push @trash, $socket unless ( $! == EAGAIN );
 		}
 	}
 

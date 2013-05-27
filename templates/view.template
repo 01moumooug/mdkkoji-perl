@@ -12,7 +12,8 @@
 	my  @trail  = split '/', $_DATA->{'URL'};
 	pop @trail;
 
-	my $query = build_query({ map { ( $_, join ',', @{$doc->field($_)} ) }
+	my $query = build_query({
+		map { ( $_, join ',', @{$doc->field($_)} ) }
 		@{$_CONF{'idx_field_names'}}
 	});
 	my $back_links = Database::back_link($path);
