@@ -1,20 +1,28 @@
 package NotesConfig;
 
 our %_CONF = (
+
 	# 사용할 포트 번호
 	'port'     => 8888, 
+	
 	# 노트 제목
-	'title'    => 'My Notes', 
-	# 루트 경로
-	'root'     => "$ENV{HOME}/notes", 
+	'title'    => 'W2 Notes', 
+	
+	# 문서 파일들의 루트 경로.
+	'root'     => "/notes", 
+	
 	# 마크다운 파일 확장자
 	'suffix'   => '.md', 
+	
 	# db 파일 이름
-	'db_path'  => 'mynotes.db', 
+	'db_path'  => 'w2notes.db', 
+	
 	# 편집용 프로그램
-	'editor'   => '/anything/you/want',
+	'editor'   => 'subl',
+	
 	# 편집용 프로토콜. 이 프로토콜과 편집용 프로그램을 연동시킵니다.
 	'edit_proto' => 'edit',
+	
 	# 색인할 헤더의 필드 이름과 기본값
 	'idx_fields' => [
 		['tags'  ,'(none)'],
@@ -22,8 +30,10 @@ our %_CONF = (
 		['author',''],
 		['status',''],
 	],
+	
 	# 내용을 검색할 경우 발췌문의 길이
 	'excerpt_length' => 150, 
+	
 	# title 필드가 없을 경우, 파일 이름을 제목으로 변환하는 방법
 	'basename2title' => sub {
 		tr/\_/ /;
