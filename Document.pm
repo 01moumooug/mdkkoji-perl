@@ -27,8 +27,8 @@ sub read {
 
 	delete $self->{'_cache_html'};
 	$self->{'_path'} = $path;
+	open my $fh, '<:crlf', $path or return $self;
 	local $/ = "\n\n";
-	open my $fh, '<', $path or return $self;
 	$self->{'_src'}->{'head'} = <$fh> || '';
 	local $/ = undef;
 	$self->{'_src'}->{'body'} = <$fh> || '';
