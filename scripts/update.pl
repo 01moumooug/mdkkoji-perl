@@ -135,7 +135,7 @@ sub update_db_entry {
 		$_[0]->field('date'),
 		$_[0]->field
 	);
-	update_link( $_[0]->path, [values %{$_[0]->urls}] );
+	update_link( $_[0]->path, [ values %{$_[0]->urls} ] );
 }
 
 
