@@ -115,6 +115,9 @@
 				</ul>
 			</div>
 			<div class='l-sidebar'>
+				<div class='list-all'>
+					<a href='/list'>List all</a>
+				</div>
 				<div class='search'>
 					<form>
 						<input type='text' name='search' value='$search_term'>

@@ -97,6 +97,8 @@ ul, ol {
 .entry-list--dirs li a:after { content: '/'; }
 .entry-list--dirs li a:hover { background-color: #360; }
 
+.list-all { text-align: right; }
+
 .search { text-align: right; }
 .search input[type=text] { width: 100%; }
 .search input[type=submit] { display: none; }
