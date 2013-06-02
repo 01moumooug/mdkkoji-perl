@@ -1,9 +1,13 @@
+<%
+	my $edit_url = $_CONF{'edit_url'};
+	   $edit_url =~ s/%u/url_decode($_DATA->{'URL'})/e;
+%>
 <!DOCTYPE HTML>
 <html>
 	<head>
 	</head>
 	<body>
 		<p>404 Not Found</p>
-		<p><a href="$_CONF{edit_proto}://$_DATA->{'URL'}">Create new one?</a></p>
+		<p><a href="$edit_url">Create new one?</a></p>
 	</body>
 </html>

@@ -4,10 +4,12 @@
 	use File::Basename;
 	use File::Spec::Functions qw/ abs2rel /;
 
-	my $path    = $_CONF{'root'}.url_decode($_DATA->{'URL'});
-	my $doc     = Document->new($path);
-	my $title   = $doc->title;
-	my $content = $doc->to_html;
+	my $path     = $_CONF{'root'}.url_decode($_DATA->{'URL'});
+	my $doc      = Document->new($path);
+	my $title    = $doc->title;
+	my $content  = $doc->to_html;
+	my $edit_url = $_CONF{'edit_url'};
+	   $edit_url =~ s/%u/url_decode($_DATA->{'URL'})/e;
 
 	my  @trail  = split '/', $_DATA->{'URL'};
 	pop @trail;
@@ -36,7 +38,7 @@
 		<div class='menu'>
 			<ul class='l-inline'>
 				<li><a href='/'>Home</a></li>
-				<li><a href='$_CONF{'edit_proto'}://$_DATA->{URL}'>Edit</a></li>
+				<li><a href='$edit_url'>Edit</a></li>
 				<li><a href='/html$_DATA->{URL}'>Plain HTML</a></li>
 				<li><% say $doc->field('date'); %></li>
 			</ul>
