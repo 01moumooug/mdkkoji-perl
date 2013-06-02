@@ -54,7 +54,11 @@
 							next unless $_;
 							$trail .= '/'.$_;
 						%>
-						<li><a href='$trail'>$_</a></li>
+						<li>
+							<a href='$trail'>
+								<% print url_decode($_); %>
+							</a>
+						</li>
 					<% } %>
 				</ul>
 			</div>
