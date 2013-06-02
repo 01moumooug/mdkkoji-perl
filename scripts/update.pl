@@ -79,7 +79,7 @@ sub update_link {
 			[]
 		,'path'
 	);
-	$from_doc = esc_squo(abs_path($from_doc)) || '';
+	$from_doc = esc_squo(abs_path($from_doc) || '');
 
 	query("
 		INSERT OR REPLACE INTO mynotes_links (from_doc, to_doc, is_live)
