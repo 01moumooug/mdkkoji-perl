@@ -126,8 +126,9 @@ sub update_link {
 sub update_db_entry {
 	# $_[0] Document object
 	if (-f $_[0]->path) {
+		my $mtime = strftime('%Y-%m-%d %H:%M:%S', localtime((stat($_[0]->path))[9]) );
 		$_[0]->field('date')
-			or $_[0]->field('date', strftime('%Y-%m-%d %H:%M:%S',localtime) )->write();
+			or $_[0]->field('date', $mtime )->write();
 	}
 	update_doc(
 		$_[0]->path,

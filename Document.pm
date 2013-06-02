@@ -107,7 +107,7 @@ sub field {
 sub to_html {
 	my $formatter = Text::Markdown->new;
 	return $_[0]->{'_cache_html'} if defined $_[0]->{'_cache_html'};
-	return '' unless $_[0]->{'_src'}->{'body'};
+	return '' unless defined $_[0]->{'_src'}->{'body'};
 	$_[0]->{'_cache_html'} = $formatter->markdown($_[0]->{'_src'}->{'body'});
 	$_[0]->{'_urls'} = $formatter->urls;
 	return $_[0]->{'_cache_html'};
