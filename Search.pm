@@ -5,7 +5,6 @@ use warnings;
 use feature qw/ say /;
 use Subroutines;
 use NotesConfig;
-use Encode;
 use Exporter qw/ import /;
 our @EXPORT = qw/ search /;
 
@@ -33,7 +32,7 @@ sub search {
 		$excerpt_length
 	);
 
-	($content, $title) = map { decode('utf8',$_) } ($content, $title);
+	# ($content, $title) = map { decode('utf8',$_) } ($content, $title);
 
 	$content =~ s/</&lt;/g;
 	$content =~ s/>/&gt;/g;	
@@ -47,7 +46,7 @@ sub search {
 
 
 	for my $query (@$quries) {
-		$query = decode('utf8',$query);
+		# $query = decode('utf8',$query);
 		$intitle_count++ while $title =~ /(\Q$query\E)/g;
 
 		while ( $content =~ /(\Q$query\E)/g ) {
@@ -77,7 +76,7 @@ sub search {
 
 	if ($match_score) {
 		$excerpt_start = max($range_winner - ($excerpt_length / 2), 0);
-		$excerpt  = encode('utf-8',substr($content, $excerpt_start, $excerpt_length));
+		$excerpt  = substr($content, $excerpt_start, $excerpt_length);
 		$excerpt  = '...'.$excerpt if $excerpt_start != 0;
 		$excerpt .= '...' if ($excerpt_start + 200) < length($content);
 
