@@ -102,7 +102,7 @@ sub _make_dir_query {
 		WHERE
 			path LIKE '".esc_squo(substr(catfile($_[0],'a'),0,-1))."%'
 	".join ' ',
-	 	map  { q|AND path NOT LIKE '|.esc_squo(substr(catfile($_[0],$_,'a'),0,-1)).q|%' | }
+	 	map  { q|AND path NOT LIKE '|.esc_squo(substr(catfile($_[0],$_),0,-1)).q|%' | }
 	 	grep { !($_ eq '.' || $_ eq '..' || /^\./) }
 	 	grep { -d catdir($_[0],$_) }
 	 	readdir($dh);
