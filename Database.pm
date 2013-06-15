@@ -18,7 +18,6 @@ our $_DBH = DBI->connect(
  	'dbi:SQLite:dbname='.$_CONF{'db_path'},'','',
  	{
  		RaiseError => 1,
- 		sqlite_unicode => 1
  	}
 ) or die $DBI::errstr;
 

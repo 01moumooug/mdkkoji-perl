@@ -40,10 +40,8 @@ sub max ($$) { $_[$_[0] < $_[1]] }
 sub csv2arr  { grep { s/^\s+|\s+$//g; $_ ne ''; } split /(?<!\\),/, $_[0]; }
 sub esc_squo { my $s = $_[0]; $s =~ s/'/''/g; $s }
 
-
-use Encode;
-sub url_encode { my $s = Encode::encode_utf8($_[0]); $s =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg; $s }
-sub url_decode { my $s = $_[0]; $s =~ tr/+/ /; $s =~ s/\%(..)/chr(hex($1))/seg; Encode::decode_utf8($s) }
+sub url_encode { my $s = $_[0]; $s =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg; $s }
+sub url_decode { my $s = $_[0]; $s =~ tr/+/ /; $s =~ s/\%(..)/chr(hex($1))/seg; $s }
 
 sub parse_query {
 	my %data;
@@ -56,7 +54,7 @@ sub parse_query {
 }
 sub build_query { join '&', map { "$_=".url_encode($_[0]->{$_}) } keys %{$_[0]}; }
 sub file2scalar {
-	open my $f, '<:utf8', $_[0] or return '';
+	open my $f, '<', $_[0] or return '';
 	local $/ = undef;
 	return <$f>;
 }

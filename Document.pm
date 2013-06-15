@@ -6,6 +6,7 @@ use feature qw/ say /;
 
 use Text::Markdown;
 use File::Basename;
+use Encode;
 
 use NotesConfig;
 use Subroutines;
@@ -27,7 +28,7 @@ sub read {
 
 	delete $self->{'_cache_html'};
 	$self->{'_path'} = $path;
-	open my $fh, '<:crlf:utf8', $path or return $self;
+	open my $fh, '<:crlf:encoding(utf8)', $path or return $self;
 	local $/ = "\n\n";
 	$self->{'_src'}->{'head'} = <$fh> || '';
 	local $/ = undef;
@@ -63,7 +64,9 @@ sub _parse_header {
 		next unless ($name && $val);
 
 		$name = lc($name);
-		$val = [ csv2arr($val) ] if ($name ~~ @LIST_FIELD);
+		$val = $name ~~ @LIST_FIELD ? 
+			[ map { Encode::encode('utf8',$_) } csv2arr($val) ] :
+			Encode::encode('utf8',$val);
 		$self->{'_field_ord_n'}        = $i;
 		$self->{'_field_ord'}->{$name} = $i++;
 		$self->{'_field'}->{$name}     = $val;
@@ -81,6 +84,7 @@ sub _make_header {
 	) {
 		my $val = $self->{'_field'}->{$name};
 		   $val = ref($val) eq 'ARRAY' ? join ', ', @$val : $val;
+		   $val = Encode::decode('utf8',$val);
 		$name = ucfirst($name);
 		$self->{'_src'}->{'head'} .= "- $name: $val\n";
 	}
@@ -114,7 +118,8 @@ sub to_html {
 	return '' unless defined $_[0]->{'_src'}->{'body'};
 	$_[0]->{'_cache_html'} = $formatter->markdown($_[0]->{'_src'}->{'body'});
 	$_[0]->{'_urls'} = $formatter->urls;
-	return $_[0]->{'_cache_html'};
+
+	return Encode::encode('utf8',$_[0]->{'_cache_html'});
 }
 
 sub urls {
@@ -130,13 +135,14 @@ sub write {
 	return unless $path;
 	$self->{'_path'} = $path;
 	open my $wr, '>', $path;
+	binmode $wr, ':utf8';
 	print $wr $self->{'_src'}->{'head'}.$self->{'_src'}->{'body'};
 	return $self;
 }
 
 sub title { return select_title(basename($_[0]->{'_path'}),$_[0]->field('title')); }
 sub path  { return $_[0]->{'_path'}; }
-sub body  { return $_[0]->{'_src'}->{'body'}; }
+sub body  { return Encode::encode('utf8',$_[0]->{'_src'}->{'body'}); }
 sub select_title {
 	my ($basename, $title, $sub) = @_;
 	return $title if $title;

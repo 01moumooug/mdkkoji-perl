@@ -77,8 +77,8 @@ sub template {
 	my $_BUFF = '';
 	
 	open    _BUFFER, '>', \$_BUFF;
-	binmode _BUFFER, ':utf8';
 	select  _BUFFER;
+	
 	my   $_SRC  = file2scalar($_TEMPLATE);
 	     $_SRC =~ s/\"/\\\"/g;
 	     $_SRC  = 'print "'.$_SRC;

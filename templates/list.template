@@ -5,20 +5,18 @@
 	use File::Basename;
 	use File::Spec::Functions qw/ abs2rel catdir /;
 	use POSIX qw/ strftime /;
-	use Encode;
 
 	$_DATA->{'URL'} = '' if $_DATA->{'URL'} eq '/';
 	my $root        = $_CONF{'root'};
-	my $path        = catdir($root,url_decode($_DATA->{'URL'}));
+	my $path        = catdir($root,$_DATA->{'URL'});
 	my $search_term = $_DATA->{'CONTENT'}->{'search'} || '';
 
 	my (@dirs, @docs, %records);
 	unless ($_DATA->{'URL'} eq '/list') {
 		opendir(my $DIR, $path);
 		@dirs =
-			map { Encode::decode_utf8($_); }
 			grep { !($_ eq '.' || $_ eq '..' || /^\./) }
-			grep { -d catdir($path,Encode::decode_utf8($_)); }
+			grep { -d catdir($path,$_); }
 			readdir($DIR);
 	}
 

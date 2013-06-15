@@ -13,7 +13,6 @@ use File::Basename;
 use File::Spec::Functions qw/ catdir catfile /;
 use POSIX qw/ strftime /;
 use Time::Local;
-use Encode;
 
 use NotesConfig;
 use Document;
@@ -24,8 +23,7 @@ chdir ("$FindBin::RealBin/../");
 
 sub update_doc ($$$%) {
 
-	my ($path, $title, $date) = map { Encode::decode_utf8($_) } @_[0..2];
-	my $fields = $_[3];
+	my ($path, $title, $date, $fields) = @_;
 	   ($path, $title) = map { esc_squo($_) } ($path, $title);
 
 	for my $field (@{$_CONF{'idx_field_names'}}) {
@@ -128,7 +126,7 @@ sub update_link {
 sub update_db_entry {
 	# $_[0] Document object
 	if (-f $_[0]->path) {
-		my $mtime = strftime('%Y-%m-%d %H:%M:%S', localtime((stat($_[0]->path))[9]) );
+		my $mtime = strftime($_CONF{'time_format'}, localtime((stat($_[0]->path))[9]) );
 		$_[0]->field('date')
 			or $_[0]->field('date', $mtime )->write();
 	}
@@ -145,7 +143,7 @@ sub update_db_entry {
 my %entries;
 query('SELECT * FROM mynotes_docs', sub{
 	my $entry = $_[0]->fetchrow_hashref or return;
-	$entries{Encode::encode_utf8($entry->{'path'})} = 1;
+	$entries{$entry->{'path'}} = 1;
 });
 
 my $last_update = query("
