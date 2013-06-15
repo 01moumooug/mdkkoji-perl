@@ -157,8 +157,7 @@ my $last_update = query("
 find ({
  	'wanted' => sub {
  		return unless /\Q$_CONF{suffix}\E$/;
- 		$_ = catfile($_,'');
-
+ 		$_ = catdir($_, '');
 		if (defined $entries{$_} && (stat($_))[9] > $last_update) {
 			update_db_entry(Document->new($_));
 			say STDOUT 'found modified document: '.$_;

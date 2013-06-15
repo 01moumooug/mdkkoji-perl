@@ -95,6 +95,7 @@ sub _make_idx_field_query {
 
 sub _make_dir_query {
 	opendir(my $dh, $_[0]);
+	
 	# 경로 뒤에 a를 붙였다가 지우는 것은 디렉토리 분리자를 남겨놓기 위함
 	return "
 		SELECT *
