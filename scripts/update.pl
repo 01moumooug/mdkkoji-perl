@@ -145,7 +145,7 @@ sub update_db_entry {
 my %entries;
 query('SELECT * FROM mynotes_docs', sub{
 	my $entry = $_[0]->fetchrow_hashref or return;
-	$entries{Encode::decode_utf8($entry->{'path'})} = 1;
+	$entries{Encode::encode_utf8($entry->{'path'})} = 1;
 });
 
 my $last_update = query("
