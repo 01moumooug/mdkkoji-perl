@@ -18,7 +18,7 @@ sub receptionist {
 	my ($request, $socket) = @_;
 	select $socket;
 
-	$request->{'CONTENT'} = parse_query($request->{'CONTENT'}) if $request->{'CONTENT'};
+	$request->{'CONTENT'} = parse_query($request->{'CONTENT'});
 
 	my ($file, $length, $response);
 	given($request->{'URL'}) {
