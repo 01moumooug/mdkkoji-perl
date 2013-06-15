@@ -45,6 +45,7 @@ sub url_decode { my $s = $_[0]; $s =~ tr/+/ /; $s =~ s/\%(..)/chr(hex($1))/seg; 
 
 sub parse_query {
 	my %data;
+	return {} unless $_[0];
 	for (split '&', $_[0]) {
 		my ($key, $val) = map { url_decode($_) } split '=', $_, 2;
 		$data{$key} = $val;
