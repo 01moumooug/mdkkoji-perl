@@ -157,6 +157,7 @@ my $last_update = query("
 find ({
  	'wanted' => sub {
  		return unless /\Q$_CONF{suffix}\E$/;
+ 		$_ = catfile($_,'');
 
 		if (defined $entries{$_} && (stat($_))[9] > $last_update) {
 			update_db_entry(Document->new($_));

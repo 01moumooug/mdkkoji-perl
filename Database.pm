@@ -95,13 +95,14 @@ sub _make_idx_field_query {
 
 sub _make_dir_query {
 	opendir(my $dh, $_[0]);
+	# 경로 뒤에 a를 붙였다가 지우는 것은 디렉토리 분리자를 남겨놓기 위함
 	return "
 		SELECT *
 		FROM   mynotes_docs
 		WHERE
-			path LIKE '".esc_squo(catfile($_[0],''))."%'
+			path LIKE '".esc_squo(substr(catfile($_[0],'a'),0,-1))."%'
 	".join ' ',
-	 	map  { q|AND path NOT LIKE '|.esc_squo(catfile($_[0],$_,'')).q|%' | }
+	 	map  { q|AND path NOT LIKE '|.esc_squo(substr(catfile($_[0],$_,'a'),0,-1)).q|%' | }
 	 	grep { !($_ eq '.' || $_ eq '..' || /^\./) }
 	 	grep { -d catdir($_[0],$_) }
 	 	readdir($dh);

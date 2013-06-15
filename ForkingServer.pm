@@ -75,6 +75,7 @@ while (my $client = $main_sock->accept()) {
 		          print $client $buffer;
 		      }
 		}
+		close $client;
 		exit();
 
 	} else {
