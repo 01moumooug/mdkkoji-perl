@@ -16,8 +16,9 @@
 	unless ($_DATA->{'URL'} eq '/list') {
 		opendir(my $DIR, $path);
 		@dirs =
+			map { Encode::decode_utf8($_); }
 			grep { !($_ eq '.' || $_ eq '..' || /^\./) }
-			grep { -d catdir($path,$_); }
+			grep { -d catdir($path,Encode::decode_utf8($_)); }
 			readdir($DIR);
 	}
 
