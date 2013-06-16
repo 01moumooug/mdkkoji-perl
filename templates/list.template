@@ -1,53 +1,15 @@
 <%  
-	use Database;
-	use Document;
-	use Search;
 	use File::Basename;
-	use File::Spec::Functions qw/ abs2rel catdir /;
 	use POSIX qw/ strftime /;
-	use Encode;
 
-	$_DATA->{'URL'} = '' if $_DATA->{'URL'} eq '/';
-	my $root        = $_CONF{'root'};
-	my $path        = catdir($root,$_DATA->{'URL'});
-	my $search_term = $_DATA->{'CONTENT'}->{'search'} || '';
-
-	my (@dirs, @docs, %records);
-	unless ($_DATA->{'URL'} eq '/list') {
-		opendir(my $DIR, $path);
-		@dirs =
-			grep { !($_ eq '.' || $_ eq '..' || /^\./) }
-			grep { -d catdir($path,$_); }
-			readdir($DIR);
-	}
-
-	@docs = @{Database::query_docs($_DATA->{'CONTENT'})};
-	@docs =
-		map {
-			$_->{'path'} = Encode::decode($_CONF{'file_name_encoding'}, $_->{'path'});
-			$_;
-		} @doc if $_CONF{'file_name_encoding'};
-
-	if ($search_term) {
-		@docs = grep {
-			my $doc = Document->new($_->{'path'});
-			($_->{'score'},$_->{'excerpt'}) =
-				search($doc->body, $doc->title, [csv2arr($search_term)]);
-			 $_->{'score'};
-		} @docs;
-		@docs = sort { $b->{'score'} <=> $a->{'score'} } @docs;
-	}
-
-	$records{$_} = Database::count_records([ map { $_->{'path'} } @docs ], $_) for @{$_CONF{'idx_field_names'}};
-
-	$_->{'path'} = abs2rel($_->{'path'}, $root) for @docs;
+	use Document;
 %>
 <!DOCTYPE HTML>
 <html>
 	<head>
 		<meta http-equiv='Content-Type' content='text/html;charset=UTF-8;'>
 		<link rel='stylesheet' href='/.css/style.css'>
-		<title>$_CONF{title} : <% say url_decode($_DATA->{'URL'}); %></title>
+		<title>$_CONF{title} : <% say url_decode($_DATA->{'request'}->{'URL'}); %></title>
 	</head>
 	<body>
 		<div class='menu--placeholder'></div>
@@ -56,7 +18,7 @@
 				<ul class='trail l-inline'>
 					<li><a href='/'>$_CONF{title}</a></li>
 					<% my $trail = ''; %>
-					<% for (split '/', $_DATA->{'URL'}) { %>
+					<% for (split '/', $_DATA->{'request'}->{'URL'}) { %>
 						<%
 							next unless $_;
 							$trail .= '/'.$_;
@@ -72,7 +34,7 @@
 			<div class='l-main'>
 				<ul class='condition'>
 					<% for my $field (@{$_CONF{'idx_field_names'}}) { %>
-						<% if ($_DATA->{'CONTENT'}->{$field}) { %>
+						<% if ($_DATA->{'request'}->{'CONTENT'}->{$field}) { %>
 							<li>
 								<span class='condition__label'>$field</span>
 								<ul class='condition__values l-inline'>
@@ -94,21 +56,26 @@
 						<% } %>
 					<% } %>
 				</ul>
-				<% unless ($_DATA->{'URL'} eq '/list') { %>
+				<% unless ($_DATA->{'request'}->{'URL'} eq '/list') { %>
 					<ul class='entry-list entry-list--dirs'>
-						<% if ($_DATA->{'URL'}) { %>
-							<li><a href='<% print dirname($_DATA->{'URL'}); %>'>..</a></li>
-						<% } %>
-
-						<% for (@dirs) { %>
+						<% if ($_DATA->{'request'}->{'URL'} ne '/') { %>
 							<li>
-								<a href='$_DATA->{URL}/$_'>$_</a>
+								<a href='<% print dirname($_DATA->{'request'}->{'URL'}); %>'>
+									..
+								</a>
 							</li>
 						<% } %>
+
+						<% for (@{$_DATA->{'dirs'}}) { %>
+							<li>
+								<a href='$_DATA->{request}->{URL}$_'>$_</a>
+							</li>
+						<% } %>
+
 					</ul>
 				<% } %>
 				<ul class='entry-list'>
-					<% for (@docs) { %>
+					<% for (@{$_DATA->{'docs'}}) { %>
 						<li>
 							<a href='/$_->{path}'>
 								<% say Document::select_title(basename($_->{'path'}),$_->{'title'}); %>
@@ -131,12 +98,16 @@
 				</div>
 				<div class='search'>
 					<form>
-						<input type='text' name='search' value='$search_term'>
-						<% for my $field (keys %{$_DATA->{'CONTENT'}}) { %>
+						<input type='text' name='search' value='$_DATA->{search_term}'>
+						<% for my $field (keys %{$_DATA->{'request'}->{'CONTENT'}}) { %>
 							<%
 								next if $field eq 'search';
 							%>
-							<input type='hidden' name='$field' value='$_DATA->{CONTENT}->{$field}'>
+							<input
+								type='hidden'
+								name='$field'
+								value='$_DATA->{request}->{CONTENT}->{$field}'
+							/>
 						<% } %>
 						<input type='submit'>
 					</form>
@@ -145,17 +116,17 @@
 					<div class='idx-field'>
 						<h3><% say ucfirst($field); %></h3>
 						<ul>
-							<% for (@{$records{$field}}) { %>
+							<% for (@{$_DATA->{'record_counts'}->{$field}}) { %>
 								<%
 									my $value = $_->{'value'};
-									my %new_query = %{$_DATA->{'CONTENT'}};
+									my %new_query = %{$_DATA->{'request'}->{'CONTENT'}};
 									$new_query{$field} = $new_query{$field} ? 
 										join (',',
 											( $value, grep { $_ ne $value } csv2arr($new_query{$field}) )
 										) : 
 										$value;
 									my $new_query = build_query(\%new_query);
-									my $class     = $_->{'count'} == $#docs + 1 ? 'idx-field__no-change' : '';
+									my $class     = $_->{'count'} == $#{$_DATA->{'docs'}} + 1 ? 'idx-field__no-change' : '';
 								%>
 								<li class='$class'>
 									<a href='?$new_query'>$value</a>

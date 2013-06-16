@@ -9,15 +9,18 @@ use Socket qw/ :crlf /;
 use Cwd    qw/ abs_path /;
 use File::Spec::Functions qw/ catpath /;
 use Encode;
+use Data::Dumper;
 
 use NotesConfig;
 use Subroutines;
 use Document;
-use Data::Dumper;
+use Content;
+
 
 sub receptionist {
 	
 	my ($request, $socket) = @_;
+	
 	select $socket;
 
 	$request->{'CONTENT'} = parse_query($request->{'CONTENT'});
@@ -28,13 +31,19 @@ sub receptionist {
 		when ('/pid')     { say "$$" }
 		when ('/dump')    { say Dumper($request) }
 		when (m|^/html/|) {
-			($file, $length) = template($_CONF{'template_dir'}.'/html.template',$request);
+
+			($file, $length) = template('templates/html.template',$request);
 			print 'HTTP/1.0 200 OK'.$CRLF;
 			print 'Content-Length: '.$length.$CRLF.$CRLF;
 			open $response, '<',$file;	
+
 		}
 		when ('/list' ) { 
-			($file, $length) = template($_CONF{'template_dir'}.'/list.template',$request);
+			
+			($file, $length) = template(
+				'templates/list.template',
+				Content::list('',$request)
+			);
 			print 'HTTP/1.0 200 OK'.$CRLF;
 			print 'Content-Length: '.$length.$CRLF.$CRLF;
 			open $response, '<',$file;
@@ -42,9 +51,9 @@ sub receptionist {
 		default {
 			
 			$file = url_decode($request->{'URL'});
-			if ($_CONF{'file_name_encoding'}) {
+			if ($_CONF{'code_page'}) {
 				$file = Encode::decode('utf8',$file);
-				$file = Encode::encode($_CONF{'file_name_encoding'},$file);
+				$file = Encode::encode($_CONF{'code_page'},$file);
 			}
 			$file = $_CONF{'root'}.$file;
 			$file = '' unless $file =~ /^\Q$_CONF{'root'}\E/;
@@ -52,11 +61,23 @@ sub receptionist {
 			if (-e $file) {
 
 				if (-d $file) {
+					
 					$request->{'CONTENT'}->{'dir'} = $file;
-					($file, $length) = template($_CONF{'template_dir'}.'/list.template',$request);
+
+					($file, $length) = template(
+						'templates/list.template',
+						Content::list($file, $request)
+					);
+
 				} elsif ( $file =~ /\Q$_CONF{suffix}\E$/ ) {
-					($file, $length) = template($_CONF{'template_dir'}.'/view.template',$request);
+
+					($file, $length) = template(
+						'templates/view.template',
+						Content::view($file, $request)
+					);
+
 				} else {
+
 					$length = (stat($file))[7];
 				}
 
@@ -66,7 +87,7 @@ sub receptionist {
 
 			} else {
 
-				($file, $length) = template($_CONF{'template_dir'}.'/404.template',$request);
+				($file, $length) = template('templates/404.template',$request);
 				print 'HTTP/1.0 404 Not Found'.$CRLF.$CRLF;
 				open $response, '<', $file;
 				
@@ -91,6 +112,7 @@ sub template {
 	     $_SRC =~ s/<%/";/g;
 	     $_SRC =~ s/%>/print "/g;
 	     $_SRC .= '";';
+
 	eval $_SRC or print $@;
 	
 	select $_SOCKET;

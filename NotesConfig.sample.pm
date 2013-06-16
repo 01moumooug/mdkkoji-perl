@@ -38,7 +38,7 @@ our %_CONF = (
 
 	# 파일 이름에서 사용하는 인코딩. 필요할 경우 설정합니다
 	# 가령 윈도우의 경우 cp949
-	'file_name_encoding' => undef,
+	'code_page' => undef,
 
 	# title 필드가 없을 경우, 파일 이름을 제목으로 변환하는 방법
 	'basename2title' => sub {
@@ -47,8 +47,6 @@ our %_CONF = (
 		return $_;
 	}
 
-	# 템플릿 폴더. 상대경로. ex) user-templates/mytory 
-	'template_dir' => 'templates'
 );
 
 use strict;
