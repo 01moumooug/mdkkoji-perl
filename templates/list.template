@@ -16,13 +16,17 @@
 	unless ($_DATA->{'URL'} eq '/list') {
 		opendir(my $DIR, $path);
 		@dirs =
-			# grep { Encode::encode($_CONF{'system_encoding'},)}
 			grep { !($_ eq '.' || $_ eq '..' || /^\./) }
 			grep { -d catdir($path,$_); }
 			readdir($DIR);
 	}
 
 	@docs = @{Database::query_docs($_DATA->{'CONTENT'})};
+	@docs =
+		map {
+			$_->{'path'} = Encode::decode($_CONF{'file_name_encoding'}, $_->{'path'});
+			$_;
+		} @doc if $_CONF{'file_name_encoding'};
 
 	if ($search_term) {
 		@docs = grep {

@@ -42,8 +42,10 @@ sub receptionist {
 		default {
 			
 			$file = url_decode($request->{'URL'});
-			$file = Encode::decode('utf8',$file);
-			$file = Encode::encode($_CONF{'system_encoding'},$file);
+			if ($_CONF{'file_name_encoding'}) {
+				$file = Encode::decode('utf8',$file);
+				$file = Encode::encode($_CONF{'file_name_encoding'},$file);
+			}
 			$file = $_CONF{'root'}.$file;
 			$file = '' unless $file =~ /^\Q$_CONF{'root'}\E/;
 			$request->{'path'} = $file;

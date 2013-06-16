@@ -28,6 +28,8 @@ sub read {
 
 	delete $self->{'_cache_html'};
 	$self->{'_path'} = $path;
+	$path = Encode::encode($_CONF{'file_name_encoding'}, $path)
+		if $_CONF{'file_name_encoding'};
 	open my $fh, '<:crlf:encoding(utf8)', $path or return $self;
 	local $/ = "\n\n";
 	$self->{'_src'}->{'head'} = <$fh> || '';
@@ -134,6 +136,8 @@ sub write {
 	$path or $path = $self->path;
 	return unless $path;
 	$self->{'_path'} = $path;
+	$path = Encode::encode($_CONF{'file_name_encoding'},$path)
+		if $_CONF{'file_name_encoding'};
 	open my $wr, '>', $path;
 	binmode $wr, ':utf8';
 	print $wr $self->{'_src'}->{'head'}.$self->{'_src'}->{'body'};
