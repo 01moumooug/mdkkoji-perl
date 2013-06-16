@@ -126,7 +126,11 @@ sub urls {
 	return {} unless -f $_[0]->path;
 	return $_[0]->{'_urls'} if defined $_[0]->{'_cache_html'};
 	$_[0]->to_html;
-	return $_[0]->{'_urls'};
+	return {
+		map {
+			$_ => Encode::encode('utf8',$_[0]->{'_urls'}->{$_});
+		} keys %{$_[0]->{'_urls'}}
+	};
 }
 
 sub write {

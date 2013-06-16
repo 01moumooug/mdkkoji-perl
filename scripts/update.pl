@@ -70,9 +70,16 @@ sub update_link {
 	$to_doc = Database::fabricate_table(
 		-e abs_path($from_doc) ?
 			[
-				map  {abs_path(
-					catfile(dirname(/^\// ? $_CONF{'root'} : $from_doc),$_)
-				)}
+				map  {
+					abs_path(
+						catfile(
+							/^\// ?
+								$_CONF{'root'} :
+								dirname($from_doc),
+							$_
+						)
+					);
+				}
 				grep { !/^[\w]+:\/\// && /\Q$_CONF{suffix}\E$/ }
 				@$to_doc
 			] :

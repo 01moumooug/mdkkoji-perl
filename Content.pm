@@ -19,7 +19,7 @@ sub view {
 
 	$data->{'doc'}      = Document->new($file);
 	$data->{'edit_url'} = $_CONF{'edit_url'};
-	$data->{'edit_url'} =~ s/%u/url_encode($request->{'URL'})/e;
+	$data->{'edit_url'} =~ s/%u/$request->{'URL'}/;
 	$data->{'query'}    = build_query({
 		map { ( $_, join ',', @{$data->{'doc'}->field($_)} ) }
 		@{$_CONF{'idx_field_names'}}

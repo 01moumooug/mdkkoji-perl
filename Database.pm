@@ -100,9 +100,14 @@ sub _make_dir_query {
 		SELECT *
 		FROM   mynotes_docs
 		WHERE
-			path LIKE '".esc_squo(substr(catfile($_[0],'a'),0,-1))."%'
+			path LIKE '".esc_squo(substr(catfile($_[0],'a'), 0, -1))."%'
 	".join ' ',
-	 	map  { q|AND path NOT LIKE '|.esc_squo(substr(catfile($_[0],$_),0,-1)).q|%' | }
+	 	map  {
+	 		my $subdir;
+	 		$subdir = catfile($_[0],$_);
+	 		$subdir = substr(catfile($subdir,'a'), 0, -1);
+	 		q|AND path NOT LIKE '|.esc_squo($subdir).q|%' |
+	 	}
 	 	grep { !($_ eq '.' || $_ eq '..' || /^\./) }
 	 	grep { -d catdir($_[0],$_) }
 	 	readdir($dh);
