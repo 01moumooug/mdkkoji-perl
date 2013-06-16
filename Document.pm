@@ -143,10 +143,13 @@ sub write {
 sub title {
 	my $basename;
 	$basename = basename($_[0]->{'_path'});
-	$basename = Encode::decode($_CONF{'code_page'}, $basename) 
-		if $_CONF{'code_page'};
+	if ($_CONF{'code_page'}) {
+		$basename = Encode::decode($_CONF{'code_page'}, $basename);
+		$basename = Encode::encode('utf8', $basename);
+	}
 	return select_title($basename,$_[0]->field('title'));
 }
+
 sub path  { return $_[0]->{'_path'}; }
 sub body  { return Encode::encode('utf8',$_[0]->{'_src'}->{'body'}); }
 sub select_title {

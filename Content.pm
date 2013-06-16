@@ -82,8 +82,10 @@ sub list {
 	$data->{'docs'} = [
 		map {
 			$_->{'path'} = abs2rel($_->{'path'}, $root);
-			$_->{'path'} = Encode::decode($_CONF{'path_encoding'}, $_->{'path'})
-				if $_CONF{'path_encoding'};
+			if ($_CONF{'code_page'}) {
+				$_->{'path'} = Encode::decode($_CONF{'code_page'}, $_->{'path'});
+				$_->{'path'} = Encode::encode('utf8', $_->{'path'});
+			}
 			$_;
 		} @{$data->{'docs'}}
 	];
