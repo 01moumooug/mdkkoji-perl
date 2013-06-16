@@ -1,6 +1,6 @@
 <%
 	my $edit_url = $_CONF{'edit_url'};
-	   $edit_url =~ s/%u/url_decode($_DATA->{'URL'})/e;
+	   $edit_url =~ s/%u/url_encode($_DATA->{'URL'})/e;
 %>
 <!DOCTYPE HTML>
 <html>
