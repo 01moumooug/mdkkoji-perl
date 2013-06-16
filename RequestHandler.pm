@@ -48,7 +48,6 @@ sub receptionist {
 			}
 			$file = $_CONF{'root'}.$file;
 			$file = '' unless $file =~ /^\Q$_CONF{'root'}\E/;
-			$request->{'path'} = $file;
 
 			if (-e $file) {
 

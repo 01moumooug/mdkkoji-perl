@@ -28,8 +28,6 @@ sub read {
 
 	delete $self->{'_cache_html'};
 	$self->{'_path'} = $path;
-	$path = Encode::encode($_CONF{'file_name_encoding'}, $path)
-		if $_CONF{'file_name_encoding'};
 	open my $fh, '<:crlf:encoding(utf8)', $path or return $self;
 	local $/ = "\n\n";
 	$self->{'_src'}->{'head'} = <$fh> || '';
@@ -136,15 +134,19 @@ sub write {
 	$path or $path = $self->path;
 	return unless $path;
 	$self->{'_path'} = $path;
-	$path = Encode::encode($_CONF{'file_name_encoding'},$path)
-		if $_CONF{'file_name_encoding'};
 	open my $wr, '>', $path;
 	binmode $wr, ':utf8';
 	print $wr $self->{'_src'}->{'head'}.$self->{'_src'}->{'body'};
 	return $self;
 }
 
-sub title { return select_title(basename($_[0]->{'_path'}),$_[0]->field('title')); }
+sub title {
+	my $basename;
+	$basename = basename($_[0]->{'_path'};
+	$basename = Encode::decode($_CONF{'file_name_encoding'}, $basename) 
+		if $_CONF{'file_name_encoding'};
+	return select_title($basename,$_[0]->field('title'));
+}
 sub path  { return $_[0]->{'_path'}; }
 sub body  { return Encode::encode('utf8',$_[0]->{'_src'}->{'body'}); }
 sub select_title {
