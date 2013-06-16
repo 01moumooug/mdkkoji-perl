@@ -8,10 +8,12 @@ use IO::Socket;
 use Socket qw/ :crlf /;
 use Cwd    qw/ abs_path /;
 use File::Spec::Functions qw/ catpath /;
+use Encode;
+
 use NotesConfig;
 use Subroutines;
 use Document;
-use Data::Dumper; 
+use Data::Dumper;
 
 sub receptionist {
 	
@@ -40,6 +42,10 @@ sub receptionist {
 		default {
 			
 			$file = url_decode($request->{'URL'});
+			if ($_CONF{'file_name_encoding'}) {
+				$file = Encode::decode('utf8',$file);
+				$file = Encode::encode($_CONF{'file_name_encoding'},$file);
+			}
 			$file = $_CONF{'root'}.$file;
 			$file = '' unless $file =~ /^\Q$_CONF{'root'}\E/;
 

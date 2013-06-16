@@ -5,6 +5,7 @@
 	use File::Basename;
 	use File::Spec::Functions qw/ abs2rel catdir /;
 	use POSIX qw/ strftime /;
+	use Encode;
 
 	$_DATA->{'URL'} = '' if $_DATA->{'URL'} eq '/';
 	my $root        = $_CONF{'root'};
@@ -21,6 +22,12 @@
 	}
 
 	@docs = @{Database::query_docs($_DATA->{'CONTENT'})};
+	@docs =
+		map {
+			$_->{'path'} = Encode::decode($_CONF{'file_name_encoding'}, $_->{'path'});
+			$_;
+		} @doc if $_CONF{'file_name_encoding'};
+
 	if ($search_term) {
 		@docs = grep {
 			my $doc = Document->new($_->{'path'});

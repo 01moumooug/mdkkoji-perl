@@ -4,9 +4,16 @@
 	use File::Basename;
 	use File::Spec::Functions qw/ abs2rel /;
 
-	my $path     = $_CONF{'root'}.url_decode($_DATA->{'URL'});
+	my $path = url_decode($request->{'URL'});
+	if ($_CONF{'file_name_encoding'}) {
+		$path = Encode::decode('utf8',$path);
+		$path = Encode::encode($_CONF{'file_name_encoding'},$path);
+	}
+
 	my $doc      = Document->new($path);
+	
 	my $title    = $doc->title;
+
 	my $content  = $doc->to_html;
 	my $edit_url = $_CONF{'edit_url'};
 	   $edit_url =~ s/%u/url_encode($_DATA->{'URL'})/e;

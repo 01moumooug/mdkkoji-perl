@@ -140,7 +140,13 @@ sub write {
 	return $self;
 }
 
-sub title { return select_title(basename($_[0]->{'_path'}),$_[0]->field('title')); }
+sub title {
+	my $basename;
+	$basename = basename($_[0]->{'_path'};
+	$basename = Encode::decode($_CONF{'file_name_encoding'}, $basename) 
+		if $_CONF{'file_name_encoding'};
+	return select_title($basename,$_[0]->field('title'));
+}
 sub path  { return $_[0]->{'_path'}; }
 sub body  { return Encode::encode('utf8',$_[0]->{'_src'}->{'body'}); }
 sub select_title {
