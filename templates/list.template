@@ -5,6 +5,7 @@
 	use File::Basename;
 	use File::Spec::Functions qw/ abs2rel catdir /;
 	use POSIX qw/ strftime /;
+	use Encode;
 
 	$_DATA->{'URL'} = '' if $_DATA->{'URL'} eq '/';
 	my $root        = $_CONF{'root'};
@@ -15,12 +16,14 @@
 	unless ($_DATA->{'URL'} eq '/list') {
 		opendir(my $DIR, $path);
 		@dirs =
+			# grep { Encode::encode($_CONF{'system_encoding'},)}
 			grep { !($_ eq '.' || $_ eq '..' || /^\./) }
 			grep { -d catdir($path,$_); }
 			readdir($DIR);
 	}
 
 	@docs = @{Database::query_docs($_DATA->{'CONTENT'})};
+
 	if ($search_term) {
 		@docs = grep {
 			my $doc = Document->new($_->{'path'});

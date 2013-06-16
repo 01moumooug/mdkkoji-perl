@@ -34,7 +34,10 @@ our %_CONF = (
 	'excerpt_length' => 150, 
 	
 	# 헤더에 넣을 시간의 형식
-	'time_format' => '%Y-%m-%d %H:%M:%S'
+	'time_format' => '%Y-%m-%d %H:%M:%S',
+
+	# 파일 이름에서 사용하는 인코딩. 윈도우의 경우 cp949
+	'system_encoding' => 'utf8',
 
 	# title 필드가 없을 경우, 파일 이름을 제목으로 변환하는 방법
 	'basename2title' => sub {

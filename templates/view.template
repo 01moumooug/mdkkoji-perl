@@ -4,7 +4,7 @@
 	use File::Basename;
 	use File::Spec::Functions qw/ abs2rel /;
 
-	my $path     = $_CONF{'root'}.url_decode($_DATA->{'URL'});
+	my $path     = $_DATA->{'path'};
 	my $doc      = Document->new($path);
 	my $title    = $doc->title;
 	my $content  = $doc->to_html;
