@@ -126,7 +126,7 @@ sub update_link {
 sub update_db_entry {
 	# $_[0] Document object
 	if (-f $_[0]->path) {
-		my $mtime = strftime('%Y-%m-%d %H:%M:%S', localtime((stat($_[0]->path))[9]) );
+		my $mtime = strftime($_CONF{'time_format'}, localtime((stat($_[0]->path))[9]) );
 		$_[0]->field('date')
 			or $_[0]->field('date', $mtime )->write();
 	}
@@ -155,6 +155,7 @@ my $last_update = query("
 find ({
  	'wanted' => sub {
  		return unless /\Q$_CONF{suffix}\E$/;
+ 		$_ = catdir($_, '');
 		if (defined $entries{$_} && (stat($_))[9] > $last_update) {
 			update_db_entry(Document->new($_));
 			say STDOUT 'found modified document: '.$_;

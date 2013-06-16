@@ -5,6 +5,7 @@ use feature qw/ say switch /;
 use IO::Select;
 use IO::Socket;
 use Fcntl;
+use POSIX qw/ :errno_h /;
 use Socket qw/ :crlf /;
 
 use RequestHandler;
@@ -98,7 +99,7 @@ while (1) {
 				}
 
 			} else {
-				push @trash, $socket unless ( $! == $!{EAGAIN} );
+				push @trash, $socket unless ( $! == EAGAIN );
 			}
 		}
 	}
@@ -113,7 +114,7 @@ while (1) {
 				push @reception, $socket;
 			}
 		} else {
-			push @trash, $socket unless ( $! == $!{EAGAIN} );
+			push @trash, $socket unless ( $! == EAGAIN );
 		}
 
 	}

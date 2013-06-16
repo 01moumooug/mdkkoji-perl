@@ -5,6 +5,7 @@ use warnings;
 
 use FindBin;
 use lib	"$FindBin::RealBin/.";
+chdir $FindBin::RealBin;
 
 use Subroutines;
 use NotesConfig;
@@ -18,5 +19,5 @@ use File::Spec::Functions qw/ catfile /;
 	$file = url_decode($file);
 
 	system('/usr/bin/leafpad', catfile($_CONF{'root'},$file));
-	exec('w2notes update');
+	exec('perl scripts/update.pl');
 }

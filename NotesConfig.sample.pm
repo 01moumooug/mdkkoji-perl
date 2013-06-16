@@ -33,6 +33,9 @@ our %_CONF = (
 	# 내용을 검색할 경우 발췌문의 길이
 	'excerpt_length' => 150, 
 	
+	# 헤더에 넣을 시간의 형식
+	'time_format' => '%Y-%m-%d %H:%M:%S'
+
 	# title 필드가 없을 경우, 파일 이름을 제목으로 변환하는 방법
 	'basename2title' => sub {
 		tr/\_/ /;
