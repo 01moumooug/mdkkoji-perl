@@ -4,12 +4,12 @@
 	use File::Basename;
 	use File::Spec::Functions qw/ abs2rel /;
 
-	my $path = url_decode($request->{'URL'});
+	my $path = $_CONF{'root'}.url_decode($_DATA->{'URL'});
 	if ($_CONF{'file_name_encoding'}) {
 		$path = Encode::decode('utf8',$path);
 		$path = Encode::encode($_CONF{'file_name_encoding'},$path);
 	}
-
+	
 	my $doc      = Document->new($path);
 	
 	my $title    = $doc->title;

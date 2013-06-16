@@ -28,13 +28,13 @@ sub receptionist {
 		when ('/pid')     { say "$$" }
 		when ('/dump')    { say Dumper($request) }
 		when (m|^/html/|) {
-			($file, $length) = template($_CONF{'template_folder'}.'/html.template',$request);
+			($file, $length) = template($_CONF{'template_dir'}.'/html.template',$request);
 			print 'HTTP/1.0 200 OK'.$CRLF;
 			print 'Content-Length: '.$length.$CRLF.$CRLF;
 			open $response, '<',$file;	
 		}
 		when ('/list' ) { 
-			($file, $length) = template($_CONF{'template_folder'}.'/list.template',$request);
+			($file, $length) = template($_CONF{'template_dir'}.'/list.template',$request);
 			print 'HTTP/1.0 200 OK'.$CRLF;
 			print 'Content-Length: '.$length.$CRLF.$CRLF;
 			open $response, '<',$file;
@@ -53,9 +53,9 @@ sub receptionist {
 
 				if (-d $file) {
 					$request->{'CONTENT'}->{'dir'} = $file;
-					($file, $length) = template($_CONF{'template_folder'}.'/list.template',$request);
+					($file, $length) = template($_CONF{'template_dir'}.'/list.template',$request);
 				} elsif ( $file =~ /\Q$_CONF{suffix}\E$/ ) {
-					($file, $length) = template($_CONF{'template_folder'}.'/view.template',$request);
+					($file, $length) = template($_CONF{'template_dir'}.'/view.template',$request);
 				} else {
 					$length = (stat($file))[7];
 				}
@@ -66,7 +66,7 @@ sub receptionist {
 
 			} else {
 
-				($file, $length) = template($_CONF{'template_folder'}.'/404.template',$request);
+				($file, $length) = template($_CONF{'template_dir'}.'/404.template',$request);
 				print 'HTTP/1.0 404 Not Found'.$CRLF.$CRLF;
 				open $response, '<', $file;
 				

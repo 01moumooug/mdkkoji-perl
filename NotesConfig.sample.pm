@@ -48,7 +48,7 @@ our %_CONF = (
 	}
 
 	# 템플릿 폴더. 상대경로. ex) user-templates/mytory 
-	'template_folder' => 'templates'
+	'template_dir' => 'templates'
 );
 
 use strict;
