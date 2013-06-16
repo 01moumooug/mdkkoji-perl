@@ -42,6 +42,9 @@ our %_CONF = (
 		s/\.[\d\w]+?$//g;
 		return $_;
 	}
+
+	# 템플릿 폴더. 상대경로. ex) user-templates/mytory 
+	'template_folder' => 'templates'
 );
 
 use strict;
