@@ -57,7 +57,7 @@
 				</ul>
 				<% unless ($_DATA->{'request'}->{'URL'} eq '/list') { %>
 					<ul class='entry-list entry-list--dirs'>
-						<% if ($_DATA->{'request'}->{'URL'} ne '/') { %>
+						<% if ($_DATA->{'request'}->{'URL'}) { %>
 							<li>
 								<a href='<% print dirname($_DATA->{'request'}->{'URL'}); %>'>
 									..
@@ -67,7 +67,7 @@
 
 						<% for (@{$_DATA->{'dirs'}}) { %>
 							<li>
-								<a href='$_DATA->{request}->{URL}$_'>$_</a>
+								<a href='$_DATA->{request}->{URL}/$_'>$_</a>
 							</li>
 						<% } %>
 
