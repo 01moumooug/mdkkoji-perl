@@ -96,7 +96,6 @@ sub list {
 	# 요청 헤더
 	$data->{'request'} = $request;
 
-
 	return $data;
 }
 

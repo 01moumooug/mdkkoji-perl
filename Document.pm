@@ -116,21 +116,21 @@ sub to_html {
 	my $formatter = Text::Markdown->new;
 	return $_[0]->{'_cache_html'} if defined $_[0]->{'_cache_html'};
 	return '' unless defined $_[0]->{'_src'}->{'body'};
-	$_[0]->{'_cache_html'} = $formatter->markdown($_[0]->{'_src'}->{'body'});
-	$_[0]->{'_urls'} = $formatter->urls;
-
-	return Encode::encode('utf8',$_[0]->{'_cache_html'});
+	$_[0]->{'_cache_html'} = Encode::encode('utf8',$formatter->markdown($_[0]->{'_src'}->{'body'}));
+	$_[0]->{'_urls'} = 
+		{
+			map {
+				$_ => Encode::encode('utf8',$_[0]->{'_urls'}->{$_});
+			} keys %{$formatter->urls}
+		};
+	return $_[0]->{'_cache_html'}; 
 }
 
 sub urls {
 	return {} unless -f $_[0]->path;
 	return $_[0]->{'_urls'} if defined $_[0]->{'_cache_html'};
 	$_[0]->to_html;
-	return {
-		map {
-			$_ => Encode::encode('utf8',$_[0]->{'_urls'}->{$_});
-		} keys %{$_[0]->{'_urls'}}
-	};
+	return $_[0]->{'_urls'};
 }
 
 sub write {
