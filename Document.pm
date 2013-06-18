@@ -117,13 +117,13 @@ sub to_html {
 	return $_[0]->{'_cache_html'} if defined $_[0]->{'_cache_html'};
 	return '' unless defined $_[0]->{'_src'}->{'body'};
 	$_[0]->{'_cache_html'} = Encode::encode('utf8',$formatter->markdown($_[0]->{'_src'}->{'body'}));
-	$_[0]->{'_urls'} = 
-		{
-			map {
-				$_ => Encode::encode('utf8',$_[0]->{'_urls'}->{$_});
-			} keys %{$formatter->urls}
-		};
-	return $_[0]->{'_cache_html'}; 
+	$_[0]->{'_urls'} = $formatter->urls;
+	$_[0]->{'_urls'} = {
+		map {
+			$_ => Encode::encode('utf8',$_[0]->{'_urls'}->{$_});
+		} keys %{$_[0]->{'_urls'}}
+	};
+	return $_[0]->{'_cache_html'};
 }
 
 sub urls {

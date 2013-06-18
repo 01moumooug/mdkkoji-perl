@@ -67,6 +67,10 @@ sub update_doc ($$$%) {
 sub update_link {
 
 	my ($from_doc, $to_doc) = @_;
+
+	$to_doc = [ map { Encode::encode($_CONF{'code_page'}, $_); } @$to_doc ];
+		if $_CONF{'code_page'};
+		
 	$to_doc = Database::fabricate_table(
 		-e abs_path($from_doc) ?
 			[
