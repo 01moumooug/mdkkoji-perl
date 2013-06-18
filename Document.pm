@@ -44,7 +44,7 @@ sub _parse_header {
 
 	# 윈도우에서는 종종 BOM을 앞에 삽입하는데(가령 notepad로 utf-8 파일을 저장하는 경우
     # 헤더 파싱을 위해 이것을 제거한다.
-	$self->{'_src'}->{'head'} =~ s/^\x{feff}//;
+	$self->{'_src'}->{'head'} =~ s/\x{feff}//g;
 	
 	unless ( $self->{'_src'}->{'head'} =~ /^([-*+] )?\w+:\s+/ ) {
 		$self->{'_field'} = {};
