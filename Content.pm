@@ -90,8 +90,12 @@ sub list {
 		} @{$data->{'docs'}}
 	];
 
+	# 디렉토리 링크를 위해 제일 앞의 '/' 제거
+	$request->{'URL'} =~ s/\///;
+
 	# 요청 헤더
 	$data->{'request'} = $request;
+
 
 	return $data;
 }
