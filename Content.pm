@@ -69,6 +69,10 @@ sub list {
 			grep { -d catdir($path,$_); }
 			readdir($DIR)
 		];
+		$data->{'dirs'} = [map{
+			Encode::from_to($_, $_CONF{'code_page'}, 'utf8');
+			$_;
+		} @{$data->{'dirs'}}] if $_CONF{'code_page'};
 	}
 
 	# 색인된 값 개수 세기
