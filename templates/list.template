@@ -59,7 +59,7 @@
 					<ul class='entry-list entry-list--dirs'>
 						<% if ($_DATA->{'request'}->{'URL'}) { %>
 							<li>
-								<a href='<% print dirname($_DATA->{'request'}->{'URL'}); %>'>
+								<a href='/<% print dirname($_DATA->{'request'}->{'URL'}); %>'>
 									..
 								</a>
 							</li>
