@@ -28,7 +28,7 @@ sub read {
 
 	delete $self->{'_cache_html'};
 	$self->{'_path'} = $path;
-	open my $fh, '<:crlf:encoding(utf8)', $path or return $self;
+	open my $fh, '<:crlf:utf8', $path or return $self;
 	local $/ = "\n\n";
 	$self->{'_src'}->{'head'} = <$fh> || '';
 	local $/ = undef;

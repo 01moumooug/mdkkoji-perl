@@ -6,7 +6,7 @@ use feature qw/ say switch /;
 
 use DBI;
 use POSIX qw/ strftime /;
-use File::Spec::Functions qw/ catdir catfile /;
+use File::Spec::Functions qw/ catdir catfile abs2rel /;
 
 use NotesConfig;
 use Subroutines;
@@ -54,7 +54,7 @@ sub query_docs {
 	}
 	my $query = join (' INTERSECT ', @queries ) || '
 		SELECT *
-		FROM   mynotes_docs
+		FROM   w2notes_docs
 	';
 	return query($query.' ORDER BY date DESC');
 }
@@ -69,7 +69,7 @@ sub _make_daterange_query {
 
 	return "
 		SELECT path, title, date
-		FROM   mynotes_docs
+		FROM   w2notes_docs
 		WHERE  date BETWEEN '$from' AND '$to'
 	";
 }
@@ -83,8 +83,8 @@ sub _make_idx_field_query {
 			field.path AS path,
 			docs.title AS title,
 			docs.date AS date
-		FROM   mynotes_$field field 
-			INNER JOIN mynotes_docs docs
+		FROM   w2notes_$field field 
+			INNER JOIN w2notes_docs docs
 				ON field.path = docs.path
 		WHERE  field.value IN ( $value )
 		GROUP  BY field.path
@@ -93,24 +93,31 @@ sub _make_idx_field_query {
 }
 
 sub _make_dir_query {
+	
 	opendir(my $dh, $_[0]);
+
+	my $path;
+	$path = abs2rel(catfile($_[0], 'a'), $_CONF{'root'});
+	$path = esc_squo(substr($path, 0, -1));
 	
 	# 경로 뒤에 a를 붙였다가 지우는 것은 디렉토리 분리자를 남겨놓기 위함
 	return "
 		SELECT *
-		FROM   mynotes_docs
+		FROM   w2notes_docs
 		WHERE
-			path LIKE '".esc_squo(substr(catfile($_[0],'a'), 0, -1))."%'
+			path LIKE '$path%'
 	".join ' ',
 	 	map  {
 	 		my $subdir;
-	 		$subdir = catfile($_[0],$_);
-	 		$subdir = substr(catfile($subdir,'a'), 0, -1);
+	 		$subdir = catdir($_[0], $_);
+	 		$subdir = abs2rel(catfile($subdir,'a'), $_CONF{'root'});
+	 		$subdir = substr($subdir, 0, -1);
 	 		q|AND path NOT LIKE '|.esc_squo($subdir).q|%' |
 	 	}
 	 	grep { !($_ eq '.' || $_ eq '..' || /^\./) }
 	 	grep { -d catdir($_[0],$_) }
 	 	readdir($dh);
+
 }
 
 sub count_records {
@@ -118,7 +125,7 @@ sub count_records {
 	# $_[1] field
 	return query("
 		SELECT $_[1].value value, COUNT(*) count
-		FROM   mynotes_$_[1] $_[1]
+		FROM   w2notes_$_[1] $_[1]
 			INNER JOIN ( ".fabricate_table($_[0],'path')." ) paths
 				ON $_[1].path = paths.path
 		GROUP BY value
@@ -129,11 +136,11 @@ sub count_records {
 sub back_link {
 	return query("
 		SELECT *
-		FROM   mynotes_docs docs
+		FROM   w2notes_docs docs
 		WHERE
 			docs.path IN (
 				SELECT from_doc
-				FROM   mynotes_links
+				FROM   w2notes_links
 				WHERE  to_doc = '".esc_squo($_[0])."'
 			)
 	")

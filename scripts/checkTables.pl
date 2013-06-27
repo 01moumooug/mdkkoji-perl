@@ -22,15 +22,15 @@ sub has_table {
 
 my %tables;
 my $need_update = 0;
-$tables{$_} = undef for grep { /^mynotes_/ } @{query('
+$tables{$_} = undef for grep { /^w2notes_/ } @{query('
 	SELECT name
 	FROM   sqlite_master
 	WHERE  type="table"
 ',sub{ return $_[0]->fetchrow_array; })};
 
-unless (has_table('mynotes_docs')) {
+unless (has_table('w2notes_docs')) {
 	$_DBH->do(q|
-		CREATE TABLE mynotes_docs (
+		CREATE TABLE w2notes_docs (
 			path  TEXT PRIMARY KEY,	
 			title TEXT,
 			date  INTEGER
@@ -38,21 +38,21 @@ unless (has_table('mynotes_docs')) {
 	|);
 	$need_update++;
 }
-unless (has_table('mynotes_links')) {
+unless (has_table('w2notes_links')) {
 	$_DBH->do(q|
-		CREATE TABLE mynotes_links (
+		CREATE TABLE w2notes_links (
 			from_doc TEXT,
 			to_doc   TEXT,
 			is_live  INTEGER,
-			FOREIGN KEY(from_doc) REFERENCES mynotes_docs(path),
+			FOREIGN KEY(from_doc) REFERENCES w2notes_docs(path),
 			PRIMARY KEY(from_doc, to_doc)
 		)
 	|);
 	$need_update++;
 }
-unless (has_table('mynotes_etc')) {
+unless (has_table('w2notes_etc')) {
 	$_DBH->do('
-		CREATE TABLE mynotes_etc (
+		CREATE TABLE w2notes_etc (
 			key   TEXT PRIMARY KEY,	
 			value TEXT
 		)
@@ -60,28 +60,28 @@ unless (has_table('mynotes_etc')) {
 	$need_update++;
 }
 
-delete $tables{'mynotes_docs'};
-delete $tables{'mynotes_links'};
-delete $tables{'mynotes_etc'};
+delete $tables{'w2notes_docs'};
+delete $tables{'w2notes_links'};
+delete $tables{'w2notes_etc'};
 
 for my $field (@{$_CONF{'idx_field_names'}}) {
-	unless(has_table("mynotes_$field")) {
+	unless(has_table("w2notes_$field")) {
 		$_DBH->do("
-			CREATE TABLE mynotes_$field (
+			CREATE TABLE w2notes_$field (
 				path   TEXT,
 				value  TEXT,
-				FOREIGN KEY(path) REFERENCES mynotes_docs(path),
+				FOREIGN KEY(path) REFERENCES w2notes_docs(path),
 				PRIMARY KEY(path, value)
 			)
 		");
 		$need_update++;
 	}
-	delete $tables{"mynotes_$field"};
+	delete $tables{"w2notes_$field"};
 }
 
 $_DBH->do("DROP TABLE $_") for keys %tables;
 
 $_DBH->do("
-	INSERT OR REPLACE INTO mynotes_etc (key, value)
+	INSERT OR REPLACE INTO w2notes_etc (key, value)
 	VALUES ('last_update', '0')
 ") if $need_update;

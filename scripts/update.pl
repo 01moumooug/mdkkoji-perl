@@ -10,7 +10,7 @@ use feature qw/ say /;
 use Cwd qw/ abs_path /;
 use File::Find;
 use File::Basename;
-use File::Spec::Functions qw/ catdir catfile /;
+use File::Spec::Functions qw/ catdir catfile abs2rel /;
 use POSIX qw/ strftime /;
 use Time::Local;
 
@@ -26,28 +26,30 @@ sub update_doc ($$$%) {
 	my ($path, $title, $date, $fields) = @_;
 	   ($path, $title) = map { esc_squo($_) } ($path, $title);
 
+	$path = abs2rel($path, $_CONF{'root'});
+
 	for my $field (@{$_CONF{'idx_field_names'}}) {
 		$fields->{$field} = $_CONF{'idx_field_defaults'}->{$field} unless $fields->{$field};
 		my $doc_table = Database::fabricate_table($fields->{$field},'value');
 		query("
-			INSERT OR IGNORE INTO mynotes_$field (path,value)
+			INSERT OR IGNORE INTO w2notes_$field (path,value)
 			SELECT '$path' path, doc.value
 			FROM   $doc_table doc
 			WHERE  doc.value != ''
 		");
 		query("
-			DELETE FROM mynotes_$field
+			DELETE FROM w2notes_$field
 				WHERE
 					path = '$path'
 					AND value NOT IN $doc_table
 		");
 	}
 
-	if (-f $path) {
+	if (-f catfile($_CONF{'root'}, $path)) {
 
-		query("INSERT OR IGNORE INTO mynotes_docs (path) VALUES ('$path')");
+		query("INSERT OR IGNORE INTO w2notes_docs (path) VALUES ('$path')");
 		query("
-			UPDATE mynotes_docs
+			UPDATE w2notes_docs
 			SET   
 				title = '$title',
 				date  = '". str2epoch($date)."'
@@ -58,7 +60,7 @@ sub update_doc ($$$%) {
 	} else {
 		query("
 			DELETE 
-				FROM  mynotes_docs
+				FROM  w2notes_docs
 				WHERE path='$path'
 		");
 	}
@@ -68,38 +70,33 @@ sub update_link {
 
 	my ($from_doc, $to_doc) = @_;
 
-	$to_doc = [ map { Encode::from_to($_, 'utf8', $_CONF{'code_page'}); $_; } @$to_doc ]
-		if $_CONF{'code_page'};
+	$to_doc = [ map {
+		Encode::from_to($_, 'utf8', $_CONF{'code_page'});
+		$_;
+	} @$to_doc ] if $_CONF{'code_page'};
 
 	$to_doc = Database::fabricate_table(
-		-e abs_path($from_doc) ?
+		-e $from_doc ?
 			[
-				map  {
-					abs_path(
-						catfile(
-							/^\// ?
-								$_CONF{'root'} :
-								dirname($from_doc),
-							$_
-						)
-					);
-				}
+				map { abs2rel($_, /^\// ? $_CONF{'root'} : dirname($from_doc)) }
 				grep { !/^[\w]+:\/\// && /\Q$_CONF{suffix}\E$/ }
 				@$to_doc
 			] :
 			[]
 		,'path'
 	);
-	$from_doc = esc_squo(abs_path($from_doc) || '');
+
+	$from_doc = abs2rel($from_doc, $_CONF{'root'});
+	$from_doc = esc_squo($from_doc);
 
 	query("
-		INSERT OR REPLACE INTO mynotes_links (from_doc, to_doc, is_live)
+		INSERT OR REPLACE INTO w2notes_links (from_doc, to_doc, is_live)
 		SELECT '$from_doc' from_doc, to_doc.path to_doc, '0' is_live
 		FROM   $to_doc to_doc
 		WHERE  to_doc.path != ''
 	");
 	query("
-		DELETE FROM mynotes_links
+		DELETE FROM w2notes_links
 		WHERE
 			from_doc = '$from_doc'
 			AND to_doc NOT IN $to_doc
@@ -108,25 +105,26 @@ sub update_link {
 	my @live_links;
 	query("
 		SELECT to_doc
-		FROM   mynotes_links
+		FROM   w2notes_links
 		WHERE  from_doc = '$from_doc'
 	",sub {
 		my $entry  = $_[0]->fetchrow_hashref or return;
 		my $target = $entry->{'to_doc'};
-		push @live_links, $target if -e $target;
+		push @live_links, $target if -e catfile($_CONF{'root'}, $target);
 	});
+
 	query("
-		UPDATE mynotes_links
+		UPDATE w2notes_links
 		SET    is_live = '1'
 		WHERE  
 			from_doc = '$from_doc'
 			AND to_doc IN ".Database::fabricate_table(\@live_links,'to_doc')
 	);
 
-	my $is_live = -e $from_doc ? 1 : 0;
+	my $is_live = -e catfile($_CONF{'root'}, $from_doc) ? 1 : 0;
 	my $is_dead = $is_live ? 0 : 1;
 	query("
-		UPDATE mynotes_links
+		UPDATE w2notes_links
 		SET    is_live = '$is_live'
 		WHERE
 			to_doc = '$from_doc'
@@ -151,32 +149,34 @@ sub update_db_entry {
 
 }
 
-
 my %entries;
-query('SELECT * FROM mynotes_docs', sub{
+query('SELECT * FROM w2notes_docs', sub{
 	my $entry = $_[0]->fetchrow_hashref or return;
 	$entries{$entry->{'path'}} = 1;
 });
 
 my $last_update = query("
 	SELECT value
-	FROM   mynotes_etc
+	FROM   w2notes_etc
 	WHERE  key = 'last_update'
 ")->[0]->{'value'} || 0;
 
 find ({
  	'wanted' => sub {
  		return unless /\Q$_CONF{suffix}\E$/;
- 		$_ = catdir($_, '');
-		if (defined $entries{$_} && (stat($_))[9] > $last_update) {
-			update_db_entry(Document->new($_));
-			say STDOUT 'found modified document: '.$_;
+ 		my $path = abs2rel($_, $_CONF{'root'});
+		if (
+			defined $entries{$path}
+			&& (stat($File::Find::name))[9] > $last_update
+		) {
+			update_db_entry(Document->new($File::Find::name));
+			say STDOUT 'found modified document: '.$path;
 		}
-		unless (defined $entries{$_}) {
-			update_db_entry(Document->new($_));
-			say STDOUT 'found new document: '.$_;
+		unless (defined $entries{$path}) {
+			update_db_entry(Document->new($File::Find::name));
+			say STDOUT 'found new document: '.$path;
 		}
-		delete $entries{$_};
+		delete $entries{$path};
  	},
  	'no_chdir' => 1
 }, $_CONF{'root'});
@@ -187,7 +187,7 @@ for (keys %entries) {
 }
 
 $_DBH->do("
-	INSERT OR REPLACE INTO mynotes_etc (key, value)
+	INSERT OR REPLACE INTO w2notes_etc (key, value)
 	VALUES ('last_update', '".timelocal(localtime)."')
 ");
 

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use feature qw/ say /;
 
-use File::Spec::Functions qw/ catdir abs2rel /;
+use File::Spec::Functions qw/ catdir catfile abs2rel /;
 
 use NotesConfig;
 use Database;
@@ -46,7 +46,7 @@ sub list {
 			sort { $b->{'score'} <=> $a->{'score'} }
 			grep {
 
-				my $doc = Document->new($_->{'path'});
+				my $doc = Document->new(catfile($root, $_->{'path'}));
 				(
 					$_->{'score'},
 					$_->{'excerpt'}
@@ -62,6 +62,7 @@ sub list {
 	}
 
 	# 디렉토리 목록
+
 	unless ($request->{'URL'} eq '/list') {
 		opendir(my $DIR, $path);
 		$data->{'dirs'} = [
@@ -82,17 +83,14 @@ sub list {
 			@{$data->{'docs'}}
 		],$_) for @{$_CONF{'idx_field_names'}};
 
-	# url에 맞게 경로 수정하기
+
 	$data->{'docs'} = [
 		map {
-			$_->{'path'} = abs2rel($_->{'path'}, $root);
-			if ($_CONF{'code_page'}) {
-				$_->{'path'} = Encode::decode($_CONF{'code_page'}, $_->{'path'});
-				$_->{'path'} = Encode::encode('utf8', $_->{'path'});
-			}
+			$_->{'path'} = Encode::decode($_CONF{'code_page'}, $_->{'path'});
+			$_->{'path'} = Encode::encode('utf8', $_->{'path'});
 			$_;
 		} @{$data->{'docs'}}
-	];
+	] if $_CONF{'code_page'};
 
 	# 디렉토리 링크를 위해 제일 앞의 '/' 제거
 	$request->{'URL'} =~ s/\///;
