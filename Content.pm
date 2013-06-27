@@ -24,7 +24,7 @@ sub view {
 		map { ( $_, join ',', @{$data->{'doc'}->field($_)} ) }
 		@{$_CONF{'idx_field_names'}}
 	});
-	$data->{'back_links'} = Database::back_link($file);
+	$data->{'back_links'} = Database::back_link(abs2rel($file, $_CONF{'root'}));
 	$data->{'request'} = $request;
 
 	return $data;

@@ -68,45 +68,51 @@ sub update_doc ($$$%) {
 
 sub update_link {
 
-	my ($from_doc, $to_doc) = @_;
+	my ($abs_from, $to) = @_;
 
-	$to_doc = [ map {
+	$to = [ map {
 		Encode::from_to($_, 'utf8', $_CONF{'code_page'});
 		$_;
-	} @$to_doc ] if $_CONF{'code_page'};
+	} @$to ] if $_CONF{'code_page'};
 
-	$to_doc = Database::fabricate_table(
-		-e $from_doc ?
+
+	$to = Database::fabricate_table(
+		-e $abs_from ?
 			[
-				map { abs2rel($_, /^\// ? $_CONF{'root'} : dirname($from_doc)) }
+				map  {
+					my $path =
+						$_ =~ /^\// ?
+							catfile($_CONF{'root'}, $_) :
+							catfile(dirname($abs_from), $_);
+					abs2rel($path, $_CONF{'root'});
+				}
 				grep { !/^[\w]+:\/\// && /\Q$_CONF{suffix}\E$/ }
-				@$to_doc
+				@$to
 			] :
 			[]
 		,'path'
 	);
 
-	$from_doc = abs2rel($from_doc, $_CONF{'root'});
-	$from_doc = esc_squo($from_doc);
-
+	my $rel_from = abs2rel($abs_from, $_CONF{'root'});
+	$rel_from = esc_squo($rel_from);
 	query("
 		INSERT OR REPLACE INTO w2notes_links (from_doc, to_doc, is_live)
-		SELECT '$from_doc' from_doc, to_doc.path to_doc, '0' is_live
-		FROM   $to_doc to_doc
+		SELECT '$rel_from' from_doc, to_doc.path to_doc, '0' is_live
+		FROM   $to to_doc
 		WHERE  to_doc.path != ''
 	");
 	query("
 		DELETE FROM w2notes_links
 		WHERE
-			from_doc = '$from_doc'
-			AND to_doc NOT IN $to_doc
+			from_doc = '$rel_from'
+			AND to_doc NOT IN $to
 	");
 
 	my @live_links;
 	query("
 		SELECT to_doc
 		FROM   w2notes_links
-		WHERE  from_doc = '$from_doc'
+		WHERE  from_doc = '$rel_from'
 	",sub {
 		my $entry  = $_[0]->fetchrow_hashref or return;
 		my $target = $entry->{'to_doc'};
@@ -117,17 +123,17 @@ sub update_link {
 		UPDATE w2notes_links
 		SET    is_live = '1'
 		WHERE  
-			from_doc = '$from_doc'
+			from_doc = '$rel_from'
 			AND to_doc IN ".Database::fabricate_table(\@live_links,'to_doc')
 	);
 
-	my $is_live = -e catfile($_CONF{'root'}, $from_doc) ? 1 : 0;
+	my $is_live = -e $abs_from ? 1 : 0;
 	my $is_dead = $is_live ? 0 : 1;
 	query("
 		UPDATE w2notes_links
 		SET    is_live = '$is_live'
 		WHERE
-			to_doc = '$from_doc'
+			to_doc = '$rel_from'
 			AND is_live = '$is_dead'
 	");
 }

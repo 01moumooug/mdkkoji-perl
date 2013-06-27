@@ -70,8 +70,7 @@
 							<ul>
 								<% for (@$back_links) { %> 
 									<li>
-										<% my $url = abs2rel($_->{'path'},$_CONF{'root'}); %>
-										<a href='/$url'>
+										<a href='/$_->{path}'>
 											<% print Document::select_title(
 												basename($_->{'path'}),$_->{'title'}
 											); %>
