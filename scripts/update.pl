@@ -188,7 +188,7 @@ find ({
 }, $_CONF{'root'});
 
 for (keys %entries) {
-	update_db_entry(Document->new($_));
+	update_db_entry( Document->new(catfile($_CONF{'root'}, $_)) );
 	say STDOUT 'found removed document: '.$_;
 }
 
