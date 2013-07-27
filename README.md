@@ -127,12 +127,14 @@ w2notes
 
 ### 문서 편집 ###
 
-문서 편집 기능은 따로 없습니다. 다만 설정 파일에서 설정한 임의 프로토콜과 편집용 프로그램을 연동하면 브라우저에서 바로 편집기를 띄우고 문서를 편집할 수 있을 것입니다. 제가 주로 사용하는 Iceweasel에서는 `about:config`에 들어가 다음과 같은 두 `boolean` 항목을 추가하고, 편집 링크를 클릭해서 `w2notes`를  선택했습니다. 
+문서 편집 기능은 따로 없습니다. 다만 설정 파일에서 설정한 임의 프로토콜과 편집용 프로그램을 연동하면 브라우저에서 바로 편집기를 띄우고 문서를 편집할 수 있을 것입니다. 제가 주로 사용하는 Iceweasel에서는 `about:config`에 들어가 다음과 같은 두 `boolean` 항목을 추가하고, 편집 링크를 클릭해서 이 프로젝트에 포함된 `edit.sample.pl` 파일을 선택했습니다.
 
 	network.protocol-handler.expose.edit      false
 	network.protocol-handler.external.edit    true
 
-여기서 `edit`는 설정 파일에 있는 edit_proto 항목의 값입니다.
+그리고 `NotesConfig.pm`에서 `edit_url`의 값을 `edit://%u`로 매겼습니다. 
+
+이렇게 하면 가령 `testfile.md` 파일을 볼 때 `edit://testfile.md`와 같은 링크가 생성되고, 이 링크를 클릭하면 Iceweasel이 edit라는 프로토콜을 `edit.sample.pl`을 실행해서 처리하며, `edit.sample.pl`는 제가 간단한 글을 쓸 때 사용하는 에디터인 leafpad를 실행해서 해당 파일을 열게됩니다.
 
 ### Windows에서 사용하기 ###
 
