@@ -108,7 +108,7 @@ w2notes
 	#!/bin/bash
 
 	while true;do 
-		inotifywait -q -e create -e move -e delete -e modify [루트 디렉토리] 1>/dev/null && \
+		inotifywait -rq -e create -e move -e delete -e modify [루트 디렉토리] 1>/dev/null && \
 		w2notes update
 	done;
 
@@ -134,7 +134,7 @@ w2notes
 
 그리고 `NotesConfig.pm`에서 `edit_url`의 값을 `edit://%u`로 매겼습니다. 
 
-이렇게 하면 가령 `testfile.md` 파일을 볼 때 `edit://testfile.md`와 같은 링크가 생성되고, 이 링크를 클릭하면 Iceweasel이 edit라는 프로토콜을 `edit.sample.pl`을 실행해서 처리하며, `edit.sample.pl`는 제가 간단한 글을 쓸 때 사용하는 에디터인 leafpad를 실행해서 해당 파일을 열게됩니다.
+이렇게 하면 가령 `testfile.md` 파일을 볼 때 `edit://testfile.md`와 같은 링크가 생성되고, 이 링크를 클릭하면 Iceweasel이 edit라는 프로토콜을 `edit.sample.pl`을 실행해서 처리하며, `edit.sample.pl`는 제가 간단한 글을 쓸 때 사용하는 에디터인 leafpad를 실행해서 해당 파일을 엽니다.
 
 ### Windows에서 사용하기 ###
 
