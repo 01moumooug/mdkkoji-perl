@@ -136,4 +136,4 @@ w2notes
 
 ### Windows에서 사용하기 ###
 
-Windows에서 사용할 경우 `w2notes` 파일을 열어서 24번째 줄의 `Server.pm`을 `SimpleServer.pm`으로 바꿉니다.
+Windows에서 사용할 경우 `w2notes` 파일을 열어서 24번째 줄의 `Server.pm`을 `SimpleServer.pm`으로 바꿉니다. 파일 이름을 utf-8로 인코딩하지 않는 환경일 경우 설정 파일에서 코드 페이지를 지정해주셔야 합니다(한글 Window의 경우 `cp949`).
