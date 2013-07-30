@@ -8,8 +8,8 @@ our %_CONF = (
 	# 노트 제목
 	'title'    => 'W2 Notes', 
 	
-	# 문서 파일들의 루트 경로.
-	'root'     => "/notes", 
+	# 도큐먼트 루트의 경로
+	'root'     => "$ENV{HOME}/notes", 
 	
 	# 마크다운 파일 확장자
 	'suffix'   => '.md', 
@@ -35,6 +35,9 @@ our %_CONF = (
 	
 	# 헤더에 넣을 시간의 형식
 	'time_format' => '%Y-%m-%d %H:%M:%S',
+
+	# 템플릿 파일이 포함된 디렉토리. 지정하지 않으면 기본 템플릿 씀
+	'template_dir' => undef, 
 
 	# 코드 페이지
 	'code_page' => undef,
@@ -62,5 +65,7 @@ for (@{$_CONF{'idx_fields'}}) {
 	push @{$_CONF{'idx_field_names'}}, $_->[0];
 	$_CONF{'idx_field_defaults'}->{$_->[0]} = [ csv2arr($_->[1] || '') ];
 }
+
+$_CONF{'template_dir'} = 'templates' unless $_CONF{'template_dir'};
 
 1;

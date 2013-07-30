@@ -7,7 +7,7 @@ use feature qw/ say switch /;
 use IO::Socket;
 use Socket qw/ :crlf /;
 use Cwd    qw/ abs_path /;
-use File::Spec::Functions qw/ catpath /;
+use File::Spec::Functions qw/ catfile /;
 use Encode;
 use Data::Dumper;
 
@@ -33,16 +33,18 @@ sub receptionist {
 		when ('/dump')    { say Dumper($request) }
 		when (m|^/html/|) {
 
-			($file, $length) = template('templates/html.template',$request);
+			($file, $length) = template(
+				catfile($_CONF{'template_dir'},'html.template'),
+				$request
+			);
 			print 'HTTP/1.0 200 OK'.$CRLF;
 			print 'Content-Length: '.$length.$CRLF.$CRLF;
 			open $response, '<',$file;	
 
 		}
 		when ('/list' ) { 
-			
 			($file, $length) = template(
-				'templates/list.template',
+				catfile($_CONF{'template_dir'},'list.template'),
 				Content::list('',$request)
 			);
 			print 'HTTP/1.0 200 OK'.$CRLF;
@@ -64,16 +66,15 @@ sub receptionist {
 				if (-d $file) {
 					
 					$request->{'CONTENT'}->{'dir'} = $file;
-
 					($file, $length) = template(
-						'templates/list.template',
+						catfile($_CONF{'template_dir'},'list.template'),
 						Content::list($file, $request)
 					);
 
 				} elsif ( $file =~ /\Q$_CONF{suffix}\E$/ ) {
 
 					($file, $length) = template(
-						'templates/view.template',
+						catfile($_CONF{'template_dir'},'view.template'),
 						Content::view($file, $request)
 					);
 
@@ -88,7 +89,10 @@ sub receptionist {
 
 			} else {
 
-				($file, $length) = template('templates/404.template',$request);
+				($file, $length) = template(
+					catfile($_CONF{'template_dir'},'404.template'),
+					$request
+				);
 				print 'HTTP/1.0 404 Not Found'.$CRLF.$CRLF;
 				open $response, '<', $file;
 				
