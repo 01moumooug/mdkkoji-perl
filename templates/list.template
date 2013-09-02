@@ -67,7 +67,7 @@
 
 						<% for (@{$_DATA->{'dirs'}}) { %>
 							<li>
-								<a href='$_DATA->{request}->{URL}/$_'>$_</a>
+								<a href='/$_DATA->{request}->{URL}/$_'>$_</a>
 							</li>
 						<% } %>
 
