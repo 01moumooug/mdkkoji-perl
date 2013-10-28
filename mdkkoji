@@ -1,0 +1,56 @@
+#!/usr/bin/env perl
+
+use v5.14;
+use warnings;
+use strict;
+
+use FindBin;
+use Pod::Usage;
+
+chdir $FindBin::RealBin;
+
+given(shift) {
+	when ('start')  { exec($^X, 'start.pl') }
+	when ('init')   { exec($^X, 'init.pl') }
+	when ('stop')   { exec($^X, 'stop.pl') }
+	when ('update') { exec($^X, 'update.pl') }
+	default {
+		pod2usage(-verbose => 99);
+	}
+}
+
+__END__
+
+=pod
+
+=head1 NAME
+
+mdkkoji
+
+=head1 SYNOPSIS
+
+mdkkoji [ I<commands> ]
+
+=head1 DESCRIPTION
+
+Program for organizing markdown documents.
+
+=head2 Commands
+
+=over 10
+
+=item C<init>
+
+Test configuration and initialize database. 
+
+=item C<start>
+
+Start mdkkoji server.
+
+=item C<stop>
+
+Stop mdkkoji server.
+
+=item C<update>
+
+Update database.

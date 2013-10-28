@@ -1,0 +1,165 @@
+body {
+	background-color: white;
+	font-family: sans-serif;
+	font-size: 14pt;
+	line-height: 1.6;
+	color: #555;
+}
+ul, ol, li, h1, h2, h3, h4, h5, h6 {
+	margin: 0px;
+	padding: 0px;
+}
+h1, h2, h3, h4, h5, h6 {
+	margin-top: 1em;
+	margin-bottom: 0.5em;
+}
+ul, ol {
+	margin-left: 1em;
+}
+a:link {
+	color: #3be;
+	text-decoration: none;
+}
+a:hover {
+	color: #05a;
+	text-decoration: underline;
+}
+.l-wrapper {
+	width: 690px;
+	margin: 0px auto;
+}
+.l-main,
+.l-side {
+	float: left;
+}
+.l-main {
+	width: 500px;
+}
+.l-side {
+	width: 190px;
+}
+.l-inline > * {
+	display: inline-block;
+}
+
+.no-list-style {
+	margin: 0px;
+}
+.no-list-style li {
+	list-style-type: none;
+}
+
+.comma-list > li + li:before {
+	content: ', ';
+}
+.tree > li + li:before {
+	content: '/';
+}
+.fields {
+	font-size: 0.8em;
+}
+.fields h3, 
+.fields ul {
+	margin: 0px;
+}
+.fields h3:after {
+	content: ':';
+}
+.fields--view {
+	text-align: center;
+}
+.fields--list a:hover {
+	color: #f00;
+}
+.title {
+	text-align: center;
+}
+.title--view {
+	color: #3be;
+}
+.side-section {
+	font-size: 0.9em;
+}
+.side-section h3 {
+	color: #ab0;
+	border-bottom: 2px solid #efb;
+}
+.main-inner {
+	margin-right: 1em;
+}
+.entries {
+	margin-bottom: 1em;
+}
+.entries a {
+	display: block;
+	padding: 0.25em 0em;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.entries a:hover {
+	background: #efb;
+	text-decoration: none;
+}
+.entries__date {
+	font-size: 0.9em;
+	color: #ab0;
+	margin-right: 1em;
+}
+.entries__excerpt {
+	font-size: 0.8em;
+	color: #999;
+}
+.entries__excerpt b {
+	color: #000;
+}
+.paging {
+	text-align: center;
+}
+.paging a, 
+.paging span {
+	display: block;
+	width: 2em;
+}
+.paging a {
+	color: #666;
+}
+.paging span {
+	color: #05a;
+	font-weight: bold;
+}
+.content p {
+	text-align: justify;
+}
+.content h2 {
+	color: #ab0;
+	border-bottom: 1px solid #ab0;
+}
+.content pre {
+	background-color: #efb;
+	padding: 1em;
+	font-size: 0.9em;
+	line-height: 1.2;
+}
+.content em {
+	font-style: normal;
+	font-weight: bold;
+}
+.content strong {
+	background-color: #efb;
+}
+.content img {
+	max-width: 100%;
+	display: block;
+}
+.content table {
+	border-collapse: collapse;
+}
+.content th, 
+.content td {
+	border: 1px solid #ddd;
+	padding: 0.25em;
+}
+.content th {
+	background-color: #efb;
+}
