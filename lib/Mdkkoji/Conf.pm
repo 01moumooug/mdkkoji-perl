@@ -6,8 +6,10 @@ use warnings;
 use DBI;
 use Encode qw/ encode decode /;
 
+our $path = $ENV{MDKKOJI_CONFIG_PATH} || 'config.pl';
+
 sub load {
-	my %conf = (do 'config.pl');
+	my %conf = (do $path);
 	my @idx_fields = @{$conf{idx_fields}};
 	my ($field, $default, @names, %defaults);
 	while (($field, $default, @idx_fields) = @idx_fields) {

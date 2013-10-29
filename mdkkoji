@@ -6,6 +6,11 @@ use strict;
 
 use FindBin;
 use Pod::Usage;
+use Cwd qw/ abs_path /;
+use Getopt::Long;
+
+GetOptions('config=s', \(my $path));
+$ENV{MDKKOJI_CONFIG_PATH} = $path ? abs_path($path) : 'config.pl';
 
 chdir $FindBin::RealBin;
 
@@ -29,7 +34,7 @@ mdkkoji
 
 =head1 SYNOPSIS
 
-mdkkoji [ I<commands> ]
+mdkkoji [ I<options> ] [ I<commands> ]
 
 =head1 DESCRIPTION
 
@@ -54,3 +59,15 @@ Stop mdkkoji server.
 =item C<update>
 
 Update database.
+
+=back
+
+=head2 Options
+
+=over 25
+
+=item C<--config [filename]>
+
+run with specified config file
+
+=back
