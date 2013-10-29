@@ -1,2 +1,3 @@
 *.db
 mime-types/mime*
+.msg
