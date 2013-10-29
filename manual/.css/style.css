@@ -141,6 +141,15 @@ a:hover {
 	font-size: 0.9em;
 	line-height: 1.2;
 }
+.content blockquote {
+	background-color: #eee;
+	border: 2px solid #aaa;
+	font-size: 0.8em;
+	line-height: 1.6;
+	margin: 0px;
+	padding: 2em;
+}
+
 .content em {
 	font-style: normal;
 	font-weight: bold;
