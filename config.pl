@@ -12,7 +12,7 @@ suffix => '.md',
 # 문서의 제목 필드 대신 사용할 수 있는 표시
 title_marker => '# ', 
 
-# 색인할 필드와 기본값
+# 색인할 필드와 기본값. 기본값이 없으면 빈 문자열이나 undef
 idx_fields => [
 	tags => '(none)', 
 	type => ''
