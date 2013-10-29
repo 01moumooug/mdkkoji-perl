@@ -44,9 +44,10 @@ templates => {
 	view => 'templates/view.tpl'
 },
 
-# DBI 생성자에 넘길 인자 목록 
 dbi => {
+	# DBI 생성자에 넘길 인자 목록 
 	args => ['dbi:SQLite:dbname=mdkkoji.db','','', { RaiseError => 1 }],
+
 	# DBI 인스턴스를 생성한 직후에 실행할 쿼리. 문자열은 쿼리로서 실행하고, 
 	# 서브루틴 참조는 생산한 DBI 인스턴스와, 설정 파일의 내용이 담긴 해시 참조를 
 	# 인자로 넘겨서 실행한다.
