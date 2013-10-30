@@ -26,7 +26,7 @@ sub DBI {
 	my $conf = shift || { &load };
 	my $dbh = DBI->connect(@{$conf->{dbi}->{args}}) or die $DBI::errstr;
 	if (ref $conf->{dbi}->{init} eq 'ARRAY') {
-		ref $_ eq 'CODE' ? &$_($dbh, $conf) : $dbh->do($_) for @{$conf->{dbi}->{init}};
+		ref $_ eq 'CODE' ? $_->($dbh, $conf) : $dbh->do($_) for @{$conf->{dbi}->{init}};
 	}
 	return $dbh;
 }

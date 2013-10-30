@@ -104,7 +104,7 @@ sub respond {
 	$request->{PATH} =~ s{(?<=.)/$}{};
 	
 	my $local_path = $opts->to_local_path($request->{PATH});
-	my $response = &{$opts->{response}}($local_path, $request, $sock);
+	my $response = $opts->{response}->($local_path, $request, $sock);
 
 	return $opts->serve_file($local_path, $request) unless $response;
 	return $response if ref $response eq 'GLOB';
@@ -216,7 +216,7 @@ sub start {
 									close $fh;
 									open  $fh, '>', '.msg';
 									close $fh;
-									&{$opts->{secret_orders}->{$msg}} if ref $opts->{secret_orders}->{$msg} eq 'CODE';
+									$opts->{secret_orders}->{$msg}->() if ref $opts->{secret_orders}->{$msg} eq 'CODE';
 								}
 								default {
 									say $sock 'unknown method';

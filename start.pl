@@ -25,7 +25,7 @@ chdir $FindBin::RealBin;
 
 my %conf = Mdkkoji::Conf::load;
 $conf{templates}->{$_} = eval Mdkkoji::Template::compile($conf{templates}->{$_})
-	or die "load failed to load $_: $@"
+or die "load failed to load $_: $@"
 	for keys $conf{templates};
 
 Mdkkoji::Server::start(
@@ -97,14 +97,14 @@ Mdkkoji::Server::start(
 
 			### template result ###
 			header(200, 'Content-Type' => 'text/html');
-			&{$conf{templates}->{list}}($request, $query, $list, \@dirs);
+			$conf{templates}->{list}->($request, $query, $list, \@dirs);
 			return 1;
 
 		##### requests to markdown documents ####
 		} elsif ($local_path =~ m/\Q$conf{suffix}\E$/) {
 			if (-e $local_path) {
 				header(200, 'Content-Type' => 'text/html');
-				&{$conf{templates}->{view}}($request, $local_path);
+				$conf{templates}->{view}->($request, $local_path);
 				return 1;
 
 			} else {
