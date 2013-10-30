@@ -29,6 +29,7 @@ code_page => 'utf8',
 
 # 색인할 문서가 들어있는 디렉토리
 doc_root => 'manual',
+doc_root => "$ENV{HOME}/notes",
 
 # 시간 필드에서 사용할 시간 형식. 첫번째 형식이 자동 생성되는
 # 시간 필드에 적용됩니다 
@@ -41,7 +42,7 @@ time_fmt => [
 # 템플릿 파일의 경로
 templates => {
 	list => 'templates/list.tpl',
-	view => 'templates/view.tpl'
+	view => 'templates/view-multimarkdown.tpl'
 },
 
 dbi => {
