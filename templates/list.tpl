@@ -13,7 +13,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>$conf{title}</title>
-	<link rel='stylesheet' type='text/css' href='/.css/style.css'>
+	<link rel='stylesheet' type='text/css' href='/theme/style.css'>
 </head>
 <body>
 	<div class='l-wrapper'>

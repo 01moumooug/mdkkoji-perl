@@ -114,6 +114,7 @@ sub respond {
 sub to_local_path {
 	my ($opts, $path) = @_;
 	my @segments;
+	my $root;
 	# collapse segments
 	for my $segment (split '/', $path, -1) {
 		next if $segment eq '.';
@@ -122,7 +123,12 @@ sub to_local_path {
 	}
 	@segments = map { unescape($_) } @segments;
 	@segments = map { encode($opts->{code_page}, decode('utf8', $_)) } @segments;
-	return catfile($opts->{doc_root}, @segments);
+	shift @segments;
+
+	$root = $opts->{root_overrides}->{$segments[0]};
+	defined $root ? shift @segments : ($root = $opts->{doc_root});
+
+	return catfile($root, @segments);
 }
 
 sub start {
@@ -134,6 +140,7 @@ sub start {
 	my $opts = bless {
 		port           => 8888, 
 		doc_root       => 'docs',
+		root_overrides => {}, 
 		code_page      => 'utf8',
 		response       => sub { return undef }, 
 		mime_type_db   => 'mime-types/mime.dbm',

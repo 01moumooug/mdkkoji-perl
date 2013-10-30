@@ -17,6 +17,7 @@ sub load {
 		$defaults{$field} = $default;
 	}
 	$conf{doc_root} = encode($conf{code_page}, $conf{doc_root});
+	$conf{root_overrides}->{$_} = encode($conf{code_page}, $conf{root_overrides}->{$_}) for keys $conf{root_overrides};
 	$conf{idx_fields} = \@names;
 	$conf{idx_field_defaults} = \%defaults;
 	return %conf;

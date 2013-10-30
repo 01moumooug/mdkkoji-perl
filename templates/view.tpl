@@ -10,7 +10,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<link rel='stylesheet' href='/.css/style.css'>
+	<link rel='stylesheet' href='/theme/style.css'>
 	<title>[% print $conf{title}; %]: [% print $doc->title; %]</title>
 </head>
 <body>

@@ -100,20 +100,33 @@ QUERY
 
 	{ # Insert actual entries into the temporary table
 		$sth = $dbh->prepare('INSERT INTO tmp_entries (ref, path, mtime) VALUES (?, ?, ?)');
-		find ({
-			wanted => sub {
+		my $dir_walker = sub {
+			my ($root, $prefix) = @_;
+			return unless -d $root;
+			find ({
+				wanted => sub {
 
-				$File::Find::prune = 1 if /^\.(.)/;
-		 		return if -d;
-		 		return unless /\Q$conf{suffix}\E$/;
+					$File::Find::prune = 1 if /^\.(.)/;
+			 		return if -d;
+			 		return unless /\Q$conf{suffix}\E$/;
 
-		 		my $path = $File::Find::name;
-		 		my $ref  = join '/', map { decode($conf{code_page}, $_) } splitdir(abs2rel($path, $conf{doc_root}));
+			 		my $path = $File::Find::name;
+			 		my @segments = splitdir(abs2rel($path, $root));
+			 		unshift @segments, $prefix if defined $prefix;
 
-		 		$sth->execute($ref, $path, (stat($_))[9]);
+			 		my $ref  = join '/', map { decode($conf{code_page}, $_) } @segments; 
+			 		eval {
+			 			$sth->execute($ref, $path, (stat($_))[9]);
+			 		} or do {
+			 			warn "$path is ignored. It may be because of root override settings";
+			 		}
 
-			}
-		}, $conf{doc_root});
+				}
+			}, $root);
+		};
+		$dir_walker->($conf{root_overrides}->{$_}, $_) for keys $conf{root_overrides};
+		$dir_walker->($conf{doc_root});
+
 	}
 
 	{ # Delete non existent entry

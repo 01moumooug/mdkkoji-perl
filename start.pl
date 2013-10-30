@@ -32,10 +32,11 @@ Mdkkoji::Server::start(
 	port      => $conf{port}, 
 	doc_root  => $conf{doc_root},
 	code_page => $conf{code_page}, 
+	root_overrides => $conf{root_overrides},
 	response  => sub {
 
 		my ($local_path, $request, $sock) = @_;
-
+		say STDOUT $local_path;
 		##### requests to directory #####
 		if (-d $local_path) {
 
