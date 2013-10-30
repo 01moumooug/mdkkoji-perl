@@ -1,6 +1,15 @@
 [%
 	my ($request, $local_path) = @_;
-	use Text::Markdown 'markdown';
+	eval {
+		require Text::MultiMarkdown;
+		Text::MultiMarkdown->import(qw| markdown |);
+		1;
+	} or do {
+		require Text::Markdown;
+		Text::Markdown->import(qw| markdown |);
+		1;		
+	};
+
 	my $doc = Mdkkoji::Document->new($local_path,
 		array_fields => $conf{idx_fields}
 	);
