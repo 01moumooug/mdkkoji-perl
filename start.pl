@@ -25,97 +25,60 @@ chdir $FindBin::RealBin;
 
 my %conf = Mdkkoji::Conf::load;
 $conf{templates}->{$_} = eval Mdkkoji::Template::compile($conf{templates}->{$_})
-or die "load failed to load $_: $@"
-	for keys $conf{templates};
+	or die "load failed to load $_: $@"
+		for keys $conf{templates};
 
 Mdkkoji::Server::start(
 	port      => $conf{port}, 
-	doc_root  => $conf{doc_root},
 	code_page => $conf{code_page}, 
-	root_overrides => $conf{root_overrides},
-	response  => sub {
-
-		my ($local_path, $request, $sock) = @_;
-		say STDOUT $local_path;
-		##### requests to directory #####
-		if (-d $local_path) {
-
-			my $query = Mdkkoji::Document->new(undef, array_fields => $conf{idx_fields});
-
-			### default conditions ###
-			$query->set_fields(%{parse_query($request->{QUERY})});
-			defined $query->fields('r') or $query->set_fields(r => $conf{recursive});
-			defined $query->fields('pg') && $query->fields('pg') >= 0 or $query->set_fields(pg => 0);
-			$query->set_fields(dir => unescape($request->{PATH}));
-
-			### filter by indexes, directory, date ###
-			my $list = Mdkkoji::EntryList->new(
-				Mdkkoji::Conf::DBI(\%conf),
-				$query->fields,
-				idx_fields => $conf{idx_fields}
+	doc_root  => $conf{doc_root},
+	root_overrides => { %{$conf{root_overrides}}, theme => $conf{theme} }, 
+	unmapped_responses => {
+		
+	}, 
+	mapped_responses => {
+		DIR => sub {
+			my ($local_path, $request) = @_;
+			my $query = Mdkkoji::Document->new(undef, array_fields => [ @{$conf{idx_fields}}, 'search' ]);
+			$query->set_fields(
+				r => $conf{recursive}, 
+				pg => 0,
+				%{parse_query($request->{QUERY})}
 			);
 
-			### filter by text search if search terms are provided ###
-			my @search = grep {$_}
-				map  { s/^\s+|\s+$//r }
-				map  { decode('utf8', $_) }
-				parse_line(',', 0, $query->fields('search'));
+			my $list = Mdkkoji::DocList->new(Mdkkoji::Conf::DBI(\%conf), $query->fields, idx_fields => $conf{idx_fields});
+			$list->filter(sub {
+				
+				my ($path, $url, $title) = @_;
+				
+				open my $fh, '<:encoding(utf8)', $path;
+				Mdkkoji::Document::parse_head($fh, $conf{title_marker});
 
-			if (scalar @search) {
-				$list->filter(sub {
-					
-					my ($path, $url, $title) = @_;
-					
-					open my $fh, '<:encoding(utf8)', $path;
-					Mdkkoji::Document::parse_head($fh, $conf{title_marker});
+				local $/ = undef;
+				my $body = <$fh>;
+				my @search = $query->fields('search');
+				my $title_match = Mdkkoji::Search::search($title, @search);
+				my $body_match  = Mdkkoji::Search::search($body, @search);
 
-					local $/ = undef;
-					my $body = <$fh>;
+				my $score   = Mdkkoji::Search::score($body_match, $title_match);
+				my $excerpt = Mdkkoji::Search::excerpt($body, $body_match);
 
-					my $title_match = Mdkkoji::Search::search($title, @search);
-					my $body_match  = Mdkkoji::Search::search($body, @search);
+				$excerpt = encode('utf8', $excerpt) if defined $excerpt;
 
-					my $score   = Mdkkoji::Search::score($body_match, $title_match);
-					my $excerpt = Mdkkoji::Search::excerpt($body, $body_match);
-
-					$excerpt = encode('utf8', $excerpt) if defined $excerpt;
-
-					return $score, $excerpt;
-
-				});
-			}
-
-			### get directory list ###
+				return $score, $excerpt;
+				
+			}) if $query->fields('search');
 			my @dirs;
-			find(sub {
-				if ($_ ne '.' && -d $_) {
-					push @dirs, encode($conf{code_page}, decode('utf8', $_)) if substr($_, 0, 1) ne '.';
-					$File::Find::prune = 1;
-				}
-			}, $local_path);
-			@dirs = sort @dirs;
-			$query->set_fields(dir => undef);
-
-			### template result ###
 			header(200, 'Content-Type' => 'text/html');
 			$conf{templates}->{list}->($request, $query, $list, \@dirs);
-			return 1;
-
-		##### requests to markdown documents ####
-		} elsif ($local_path =~ m/\Q$conf{suffix}\E$/) {
-			if (-e $local_path) {
-				header(200, 'Content-Type' => 'text/html');
-				$conf{templates}->{view}->($request, $local_path);
-				return 1;
-
-			} else {
-				header(404);
-				return 1;
-
-			}
-
-		} 
-	}
+		}, 
+		md => sub {
+			my ($local_path, $request) = @_;
+			header(200, 'Content-Type' => 'text/html');
+			$conf{templates}->{view}->($request, $local_path);
+		}, 
+		pl => sub {}
+	}, 
 );
 
 exec($^X, $0);

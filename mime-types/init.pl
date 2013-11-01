@@ -1,4 +1,3 @@
-'tar.gz' => 'application/x-tar', 
 'rtf' => 'application/rtf', 
 'swf' => 'application/x-shockwave-flash', 
 'mpeg' => 'video/mpeg', 

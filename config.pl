@@ -28,15 +28,23 @@ entries_per_page => 10,
 code_page => 'utf8',
 
 # 색인할 문서가 들어있는 디렉토리
-doc_root => 'manual',
 doc_root => "$ENV{HOME}/notes",
 
 # URL 경로 부분의 첫번째 세그먼트에 따라 다른 디렉토리에 URL을 매핑합니다
 root_overrides => {
-	# theme은 테마를 위해 남겨둡니다
-	theme => 'default-theme',
 	devdocs => "$ENV{HOME}/devdocs"
+	# theme은 테마를 위해 남겨둡니다
 }, 
+
+# 템플릿, css 등이 담긴 디렉토리
+theme => 'default-theme',
+
+# 템플릿 파일의 경로
+templates => {
+	list => 'default-theme/list.tpl',
+	view => 'default-theme/view.tpl'
+},
+
 
 # 시간 필드에서 사용할 시간 형식. 첫번째 형식이 자동 생성되는
 # 시간 필드에 적용됩니다 
@@ -45,12 +53,6 @@ time_fmt => [
 	'%Y-%m-%d',
 	'%Y년 %m월 %d일',
 ],
-
-# 템플릿 파일의 경로
-templates => {
-	list => 'templates/list.tpl',
-	view => 'templates/view.tpl'
-},
 
 dbi => {
 	# DBI 생성자에 넘길 인자 목록 

@@ -1,4 +1,4 @@
-package Mdkkoji::EntryList;
+package Mdkkoji::DocList;
 
 use v5.14;
 use warnings;
@@ -224,12 +224,12 @@ __END__
 
 =head1 NAME
 
-Mdkkoji::EntryList - 조건에 맞는 문서를 찾아냅니다.
+Mdkkoji::DocList - 조건에 맞는 문서를 찾아냅니다.
 
 =head1 SYNOPSIS
 
   use DBI;
-  use Mdkkoji::EntryList;
+  use Mdkkoji::DocList;
 
   $dbh = DBI->connect('dbi:SQLite:dbname=mdkkoji.db','','', { RaiseError => 1 });
   $conditions = {
@@ -242,7 +242,7 @@ Mdkkoji::EntryList - 조건에 맞는 문서를 찾아냅니다.
       dir => 'some/dir'
   };
 
-  $list = EntryList->new($dbh, $conditions, @options);
+  $list = DocList->new($dbh, $conditions, @options);
   $list->filter(sub{
       my ($path, $ref, $title, $score, $excerpt) = @_;
       # ...
@@ -279,7 +279,7 @@ Mdkkoji::EntryList - 조건에 맞는 문서를 찾아냅니다.
 
   tags => [qw| tag1 tag2 tag3 |]
 
-그러면 EntryList는 해당 필드에 지정한 값이 모두 있는 문서를 찾습니다.
+그러면 DocList는 해당 필드에 지정한 값이 모두 있는 문서를 찾습니다.
 
 색인용 필드 외에도 다른 조건을 걸 수 있습니다. 이 때 조건 값은 배열 참조가 
 아니라 스칼라로 지정합니다. 

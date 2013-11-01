@@ -63,7 +63,7 @@ sub header {
 
 sub serve_file {
 
-	my ($opts, $local_path, $request) = @_;
+	my ($opts, $local_path, $type, $request) = @_;
 
 	open my $fh, '<:raw', $local_path or header(404) and return;
 
@@ -71,17 +71,14 @@ sub serve_file {
 	my $mtime = format_time($stat[MTIME]);
 	my $etag  = $stat[INODE].'-'.$stat[MTIME];
 
-	# say "use the cache" if not modified
 	header(304) and return if
 		(defined $request->{'if-modified-since'} &&
 		$request->{'if-modified-since'} eq $mtime ) ||
 		(defined $request->{'if-none-match'} &&
 		$request->{'if-none-match'} eq $etag);
 
-	my $suffix = (fileparse($local_path, @{$opts->{valid_suffixes}}))[2] || '.';
-
 	header(200,
-		'Content-Type'   => $opts->{mime_types}->{substr($suffix, 1)} || 'application/octet-stream',
+		'Content-Type'   => $type || 'application/octet-stream',
 		'Content-Length' => $stat[SIZE], 
 		'Etag'           => $etag, 
 		'Date'           => format_time(time), 
@@ -95,18 +92,37 @@ sub serve_file {
 
 sub respond {
 	my ($opts, $request, $sock) = @_;
-
+	my ($unmapped, $mapped) = @{$opts}{qw| unmapped_responses mapped_responses |};
 	select $sock;
 
 	$request->{URL} =~ m|^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?$|;
-	@{$request}{qw| PATH QUERY |} = ($3, $4);
+	my ($path, $query) = ($3, $4);
+	$path =~ s{(?<=.)/$}{}; # remove trailing slash
 
-	$request->{PATH} =~ s{(?<=.)/$}{};
-	
-	my $local_path = $opts->to_local_path($request->{PATH});
-	my $response = $opts->{response}->($local_path, $request, $sock);
+	@{$request}{qw| PATH QUERY |} = ($path, $query);
 
-	return $opts->serve_file($local_path, $request) unless $response;
+	my $response;
+	if (exists $unmapped->{$path}) {
+		$response = $unmapped->{$path}->($request) if exists $unmapped->{$path};
+
+	} else {
+		my $local_path = $opts->to_local_path($request->{PATH});
+		if (-d $local_path) {
+			$response = $mapped->{DIR}->($local_path, $request, $sock) if -d $local_path;
+			
+		} elsif (-f $local_path) {
+			
+			$local_path =~ /\.([\w]+)$/;
+			my $suffix = $1 || '';
+			$response = exists $mapped->{$suffix} ?
+				$mapped->{$suffix}->($local_path, $request, $sock) : 
+				$opts->serve_file($local_path, $opts->{mime_types}->{$suffix}, $request);
+
+		} else {
+			header(404);
+
+		}
+	}
 	return $response if ref $response eq 'GLOB';
 
 }
@@ -115,6 +131,8 @@ sub to_local_path {
 	my ($opts, $path) = @_;
 	my @segments;
 	my $root;
+
+
 	# collapse segments
 	for my $segment (split '/', $path, -1) {
 		next if $segment eq '.';
@@ -142,14 +160,16 @@ sub start {
 		doc_root       => 'docs',
 		root_overrides => {}, 
 		code_page      => 'utf8',
-		response       => sub { return undef }, 
+		unmapped_responses => {},
+		mapped_responses => {}, 
 		mime_type_db   => 'mime-types/mime.dbm',
-		valid_suffixes => [ qw/ .tar.gz .tar.bz /, qr/\.\w+$/ ],
 		secret_orders  => {
 			stop => sub { exit(); }
 		},
 		@_
 	}, __PACKAGE__;
+
+	$opts->{mapped_responses}->{DIR} = sub {} unless exists $opts->{mapped_responses}->{DIR};
 
 	tie my %mime, 'AnyDBM_File', $opts->{mime_type_db}, O_RDONLY, 0666 or
 		warn "cannot open mime type db: $opts->{mime_type_db}".$!;
