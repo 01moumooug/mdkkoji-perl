@@ -15,7 +15,7 @@ use Text::ParseWords;
 use lib File::Spec->catdir($FindBin::RealBin, 'lib');
 use Mdkkoji::Conf;
 use Mdkkoji::Document;
-use Mdkkoji::EntryList;
+use Mdkkoji::DocList;
 use Mdkkoji::Search;
 use Mdkkoji::Server qw/ header /;
 use Mdkkoji::Template;
@@ -39,35 +39,28 @@ Mdkkoji::Server::start(
 	mapped_responses => {
 		DIR => sub {
 			my ($local_path, $request) = @_;
-			my $query = Mdkkoji::Document->new(undef, array_fields => [ @{$conf{idx_fields}}, 'search' ]);
-			$query->set_fields(
+			my $query = Mdkkoji::Document->new(undef,
+				array_fields => $conf{idx_fields}
+			)->set_fields(
 				r => $conf{recursive}, 
 				pg => 0,
 				%{parse_query($request->{QUERY})}
 			);
-
-			my $list = Mdkkoji::DocList->new(Mdkkoji::Conf::DBI(\%conf), $query->fields, idx_fields => $conf{idx_fields});
-			$list->filter(sub {
-				
-				my ($path, $url, $title) = @_;
-				
-				open my $fh, '<:encoding(utf8)', $path;
-				Mdkkoji::Document::parse_head($fh, $conf{title_marker});
-
-				local $/ = undef;
-				my $body = <$fh>;
-				my @search = $query->fields('search');
-				my $title_match = Mdkkoji::Search::search($title, @search);
-				my $body_match  = Mdkkoji::Search::search($body, @search);
-
-				my $score   = Mdkkoji::Search::score($body_match, $title_match);
-				my $excerpt = Mdkkoji::Search::excerpt($body, $body_match);
-
-				$excerpt = encode('utf8', $excerpt) if defined $excerpt;
-
-				return $score, $excerpt;
-				
-			}) if $query->fields('search');
+			my $list = Mdkkoji::DocList->new(
+				Mdkkoji::Conf::DBI(\%conf),
+				$query->fields,
+			);
+			if ($query->fields('search')) {
+				$list->filter(sub {
+					my ($path, $title) = @{$_[0]}{qw| path title |};
+					open my $fh, '<:encoding(utf8)', $path;
+					Mdkkoji::Document::parse_head($fh, $conf{title_marker});
+					local $/ = undef;
+					my $body = <$fh>;
+					return Mdkkoji::Search::doit($body, $title, $query->fields('search'));
+				});
+			}
+			
 			my @dirs;
 			header(200, 'Content-Type' => 'text/html');
 			$conf{templates}->{list}->($request, $query, $list, \@dirs);
@@ -77,7 +70,9 @@ Mdkkoji::Server::start(
 			header(200, 'Content-Type' => 'text/html');
 			$conf{templates}->{view}->($request, $local_path);
 		}, 
-		pl => sub {}
+		pl => sub {
+
+		}
 	}, 
 );
 
