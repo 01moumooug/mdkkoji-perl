@@ -52,12 +52,11 @@ Mdkkoji::Server::start(
 			);
 			if ($query->fields('search')) {
 				$list->filter(sub {
-					my ($path, $title) = @{$_[0]}{qw| path title |};
-					open my $fh, '<:encoding(utf8)', $path;
+					open my $fh, '<:encoding(utf8)', $_[0]->{path};
 					Mdkkoji::Document::parse_head($fh, $conf{title_marker});
 					local $/ = undef;
 					my $body = <$fh>;
-					return Mdkkoji::Search::doit($body, $title, $query->fields('search'));
+					return Mdkkoji::Search::doit($body, $_[0]->{title}, $query->fields('search'));
 				});
 			}
 			
@@ -65,7 +64,7 @@ Mdkkoji::Server::start(
 			header(200, 'Content-Type' => 'text/html');
 			$conf{templates}->{list}->($request, $query, $list, \@dirs);
 		}, 
-		md => sub {
+		lc $conf{suffix} => sub {
 			my ($local_path, $request) = @_;
 			header(200, 'Content-Type' => 'text/html');
 			$conf{templates}->{view}->($request, $local_path);

@@ -113,7 +113,7 @@ sub respond {
 		} elsif (-f $local_path) {
 			
 			$local_path =~ /\.([\w]+)$/;
-			my $suffix = $1 || '';
+			my $suffix = lc $1 || '';
 			$response = exists $mapped->{$suffix} ?
 				$mapped->{$suffix}->($local_path, $request, $sock) : 
 				$opts->serve_file($local_path, $opts->{mime_types}->{$suffix}, $request);
