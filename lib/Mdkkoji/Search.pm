@@ -3,7 +3,80 @@ package Mdkkoji::Search;
 use v5.14;
 use strict;
 use warnings;
+use List::Util qw/ sum reduce /;
+use Encode;
+
+use Mdkkoji::Document;
+
 use constant EXCERPT_LEN => 150;
+
+sub doit {
+
+	my ($body, $title, $queries) = @_;
+	my @queries = map { decode('utf8', $_) } split /\s+/, $queries;
+	my (%pos, %score);
+	my $title_matches = 0;
+
+	$body =~ s/\s+/ /g;
+	
+	my $body_orig = $body;
+	$body =~ tr/A-Z/a-z/;
+	$title =~ tr/A-Z/a-z/;
+
+	# search
+	foreach my $q (@queries) {
+		my $q_len = length $q;
+		{ # in title
+			my $offset = 0;
+			while ((my $pos = index($title, $q, $offset)) != -1) {
+				$title_matches++;
+				$score{$q}++;
+				$offset = $pos + $q_len;
+			}
+		}
+		{ # in body
+			my $offset = 0;
+			$pos{$q} = [];
+			while ((my $pos = index($body, $q, $offset)) != -1) {
+				$score{$q}++;
+				push @{$pos{$q}}, $pos;
+				$offset = $pos + $q_len;
+			}
+		}
+		return (0, undef) unless $score{$q};
+	}
+
+	my $score;
+	{ # calculate score
+		my $sum = sum values %score;
+		my $sqr_sum = reduce { our $a + $b * $b } (0, values %score);
+		$score = $sqr_sum ? ( $sum * $sum / $sqr_sum - 1 + $sum ) ** ($title_matches + 1) : 0;
+	}
+
+	my $excerpt;
+	{ # make excerpt
+		my $center = pick(map {@$_} values %pos);
+		my $begin;
+
+		$begin = $center - EXCERPT_LEN / 2;
+		$begin = 0 unless $begin >= 0;
+
+		$excerpt = '...' unless $begin == 0;
+		$excerpt .= substr($body_orig, $begin, EXCERPT_LEN);
+		$excerpt =~ s/&/&amp;/g;
+		$excerpt =~ s/</&lt;/g;
+		$excerpt =~ s/>/&gt;/g;
+		$excerpt .= '...' if $begin + EXCERPT_LEN < length($body);
+
+		for my $q (@queries) {
+			my $quoted = quotemeta $q;
+			$excerpt =~ s{($quoted)}{<b>$1</b>}gi;
+		}
+		$excerpt = encode('utf8', $excerpt);
+	}
+	
+	return ($score, $excerpt);
+}
 
 sub pick {
 	
@@ -22,76 +95,4 @@ sub pick {
 
 }
 
-sub unfat {
-	${$_[0]} =~ s/\s+/ /g;
-}
-
-sub search {
-	my $content = shift || '';
-	unfat(\$content);
-	my @queries = grep {$_} @_;
-	my %lengths = (map { $_ => length } @queries);
-	my %results = (map { $_ => [] } @queries);
-	for my $q (@queries) {
-		my $offset = 0;
-		while ((my $pos = index($content, $q, $offset)) != -1) {
-			push @{$results{$q}}, $pos;
-			$offset = $pos + $lengths{$q};
-		}
-		unless (scalar @{$results{$q}}) {
-			%results = (map { $_ => [] } @queries);
-			last;
-		}
-	}
-	return \%results;
-}
-
-sub score {
-	my ($match, $title) = @_;
-	my ($sum, $sqr_sum, $in_title_count) = (0, 0, 0);
-
-	for (values $match) {
-		next unless ref $_ eq 'ARRAY';
-		my $s = scalar @$_;
-		$sum     += $s;
-		$sqr_sum += $s * $s;
-	}
-
-	for (values $title) {
-		next unless ref $_ eq 'ARRAY';
-		$in_title_count += scalar @$_;
-	}
-
-	return $sqr_sum ?
-		( $sum * $sum / $sqr_sum - 1 + $sum ) ** ($in_title_count + 1) :
-		0 + $in_title_count * $in_title_count;
-
-}
-
-sub excerpt {
-	my ($content, $search_result) = @_;
-
-	my $pos = pick(map {@$_} values $search_result);
-
-	return unless defined $pos;
-
-	my ($begin, $excerpt);
-	my $length = length($content);
-	$begin = $pos - EXCERPT_LEN / 2;
-	$begin = 0 unless $begin >= 0;
-
-	$excerpt = '...' unless $begin == 0;
-	$excerpt .= substr($content, $begin, EXCERPT_LEN);
-	$excerpt =~ s/&/&amp;/g;
-	$excerpt =~ s/</&lt;/g;
-	$excerpt =~ s/>/&gt;/g;
-
-	$excerpt .= '...' if $begin + EXCERPT_LEN < $length;
-
-	for my $query (keys $search_result) {
-		my $quoted = quotemeta $query;
-		$excerpt =~ s{$quoted}{<b>$query</b>}g;
-	}
-	return $excerpt;
-}
 1;
