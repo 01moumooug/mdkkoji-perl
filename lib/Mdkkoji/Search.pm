@@ -18,8 +18,6 @@ sub doit {
 	my $title_matches = 0;
 
 	$body =~ s/\s+/ /g;
-	
-	my $body_orig = $body;
 	$body =~ tr/A-Z/a-z/;
 	$title =~ tr/A-Z/a-z/;
 
@@ -62,7 +60,7 @@ sub doit {
 		$begin = 0 unless $begin >= 0;
 
 		$excerpt = '...' unless $begin == 0;
-		$excerpt .= substr($body_orig, $begin, EXCERPT_LEN);
+		$excerpt .= substr($body, $begin, EXCERPT_LEN);
 		$excerpt =~ s/&/&amp;/g;
 		$excerpt =~ s/</&lt;/g;
 		$excerpt =~ s/>/&gt;/g;
