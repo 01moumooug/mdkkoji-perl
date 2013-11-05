@@ -64,7 +64,7 @@ sub set_fields {
                 $value = [ unique(@$value) ];
             }
 
-            CORE::push (@{$self->{_ord}}, $field) unless $self->{fields}->{$field};
+            CORE::push (@{$self->{_ord}}, $field) unless exists $self->{fields}->{$field};
 
             $self->{fields}->{$field} = $value;
         } else {
