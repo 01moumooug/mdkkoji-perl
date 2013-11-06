@@ -101,7 +101,8 @@ QUERY
 	{ # Insert actual entries into the temporary table
 		$sth = $dbh->prepare('INSERT INTO tmp_entries (ref, path, mtime) VALUES (?, ?, ?)');
 		my $dir_walker = sub {
-			my ($root, $prefix) = @_;
+			my ($root, $override) = @_;
+			
 			return unless -d $root;
 			find ({
 				wanted => sub {
@@ -112,7 +113,7 @@ QUERY
 
 			 		my $path = $File::Find::name;
 			 		my @segments = splitdir(abs2rel($path, $root));
-			 		unshift @segments, $prefix if defined $prefix;
+			 		unshift @segments, $override if defined $override;
 
 			 		my $ref  = join '/', map { decode($conf{code_page}, $_) } @segments; 
 			 		eval {
