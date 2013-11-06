@@ -13,7 +13,6 @@ use File::Spec;
 use lib File::Spec->catdir($FindBin::RealBin, 'lib');
 use Mdkkoji::Conf;
 
-
 chdir $FindBin::RealBin;
 my %conf = Mdkkoji::Conf::load;
 
