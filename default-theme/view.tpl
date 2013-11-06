@@ -20,7 +20,7 @@
 				my @segments = split '/', $request->{PATH}, -1;
 				pop @segments;
 			%]
-				<ul class='no-list-style l-inline tree'>
+				<ul class='no-list-style l-inline tree no-print'>
 					<li>
 						<a href='/'>$conf{title}</a>
 					</li>
@@ -43,7 +43,7 @@
 			</li>
 			[% for my $field (@{$conf{idx_fields}}) { %]
 				[% if ($doc->fields($field)) { %]
-					<li class='l-inline'>
+					<li class='l-inline no-print'>
 						<h3>[% print ucfirst($field); %]</h3>
 						<ul class='l-inline comma-list'><!--
 							[% for my $value ($doc->fields($field)) { %]

@@ -145,14 +145,11 @@ a:hover {
 	line-height: 1.2;
 }
 .content blockquote {
-	background-color: #eee;
-	border: 2px solid #aaa;
-	font-size: 0.8em;
-	line-height: 1.6;
-	margin: 0px;
-	padding: 2em;
+	border-left: 0.5em solid #ccc;
+	margin: 2em 0em;
+	font-size: 0.9em;
+	padding: 0em 2.5em 0em 2em;
 }
-
 .content em {
 	font-style: normal;
 	font-weight: bold;
@@ -174,4 +171,39 @@ a:hover {
 }
 .content th {
 	background-color: #efb;
+}
+
+@media print {
+	body {
+		font-size: 10pt;
+	}
+	.title--view, 
+	.content h2,
+	a:link, a:visited,
+	.content strong {
+		color: #000;
+	}
+	.content pre,
+	.content blockquote {
+		background-color: transparent;
+	}
+	.content pre {
+		border-top: 1px dashed #666;
+		border-bottom: 1px dashed #666;
+	}
+	.content blockquote {
+		border: none;
+	}
+	.content h2 {
+		border-bottom-color: #000;
+	}
+	.content ul {
+		margin-left: 2em;
+	}
+	.l-wrapper {
+		width: 100%;
+	}
+	.no-print {
+		display: none;
+	}
 }
