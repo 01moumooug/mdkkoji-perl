@@ -32,7 +32,7 @@ doc_root => "$ENV{HOME}/notes",
 
 # URL 경로 부분의 첫번째 세그먼트에 따라 다른 디렉토리에 URL을 매핑합니다
 root_overrides => {
-	# devdocs => "$ENV{HOME}/devdocs"
+	devdocs => "$ENV{HOME}/devdocs"
 	# theme은 테마를 위해 남겨둡니다
 }, 
 
