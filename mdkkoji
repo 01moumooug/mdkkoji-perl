@@ -26,6 +26,10 @@ given(shift) {
 	when ('init')   { exec($^X, 'init.pl') }
 	when ('stop')   { exec($^X, 'stop.pl') }
 	when ('update') { exec($^X, 'update.pl') }
+	when ('restart') {
+		system($^X, $0, 'stop');
+		exec($^X, $0, 'start');
+	}
 	default {
 		pod2usage(-verbose => 99);
 	}
