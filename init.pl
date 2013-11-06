@@ -16,4 +16,3 @@ do 'create-tables.pl';
 unshift @ARGV, 'init';
 do 'mime.pl';
 do 'update.pl';
-exec($^X, 'mdkkoji', 'start');

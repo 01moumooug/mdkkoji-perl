@@ -29,7 +29,8 @@ given(shift) {
 	when ('status') { exec($^X, 'status.pl') }
 	when ('init')   {
 		system($^X, $0, 'stop');
-		exec($^X, 'init.pl')
+		system($^X, 'init.pl');
+		exec($^X, $0, 'start');
 	}
 	when ('stop')   { exec($^X, 'stop.pl') }
 	when ('update') { exec($^X, 'update.pl') }
