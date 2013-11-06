@@ -68,8 +68,18 @@ a:hover {
 .fields--view {
 	text-align: center;
 }
-.fields--list a:hover {
+.set-link:hover:after {
+	content: "+";
+}
+.unset-link:link {
+	font-weight: bold;
+	color: #05a;
+}
+.unset-link:hover {
 	color: #f00;
+}
+.unset-link:hover:after {
+	content: "-";
 }
 .title {
 	text-align: center;

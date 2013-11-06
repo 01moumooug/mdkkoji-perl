@@ -33,7 +33,7 @@
 											push @segments, $_ and print join "/", (@segments, "..");
 										%]?[%
 											print build_query($query->clone->set_fields(pg => 0)->fields);
-										%]'>
+										%]' class='unset-link'>
 											[% print unescape($_); %]
 										</a>
 									</li>
@@ -41,25 +41,6 @@
 							</ul>
 						[% } %]
 					</li>
-					[% for my $field (@{$conf{idx_fields}}) { %]
-
-						[% next unless (@{[$query->fields($field)]}); %]
-
-						<li class='l-inline'>
-							<h3>[% print ucfirst($field); %]</h3>
-							<ul class='no-list-style l-inline comma-list'>
-								[% for my $value ($query->fields($field)) { %]
-									<li>
-										<a href="?[%
-											print build_query($query->clone->pull($field, $value)->set_fields(pg => 0)->fields);
-										%]">
-											$value
-										</a>
-									</li>
-								[% } %]	
-							</ul>
-						</li>
-					[% } %]
 				</ul>
 
 				<!-- Matched Entries -->
@@ -160,11 +141,17 @@
 						[% for my $stat (@{$list->count_entries($field)}) { %]
 							<li>
 								[% if ($total != $stat->{count}) { %]
-									<a href="?[% print build_query($query->clone->push($field => $stat->{value})->set_fields(pg => 0)->fields); %]">
+									<a href="?[% print build_query($query->clone->push($field => $stat->{value})->set_fields(pg => 0)->fields); %]" class='set-link'>
 										$stat->{value}($stat->{count})
 									</a>
 								[% } else { %]
-									$stat->{value}($stat->{count})
+									[% if ($stat->{value} ~~ ($query->fields($field))) { %]
+										<a href="?[% print build_query($query->clone->pull($field, $stat->{value})->set_fields(pg => 0)->fields); %]" class='unset-link'>
+											$stat->{value}($stat->{count})
+										</a>
+									[% } else { %]
+										$stat->{value}($stat->{count})
+									[% } %]
 								[% } %]
 							</li>
 						[% } %]
