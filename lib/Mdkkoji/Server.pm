@@ -5,6 +5,10 @@ use strict;
 use warnings;
 
 use constant {
+	HEADER_LINE_MAX_LEN => 2048,
+	POST_MAX => 8192
+};
+use constant {
 	MTIME => 9, 
 	SIZE  => 7,
 	INODE => 1,
@@ -102,8 +106,8 @@ sub respond {
 	@{$request}{qw| PATH QUERY |} = ($path, $query);
 
 	my $response;
-	if (exists $unmapped->{$path}) {
-		$response = $unmapped->{$path}->($request) if exists $unmapped->{$path};
+	if (ref $unmapped->{$path} eq 'CODE') {
+		$response = $unmapped->{$path}->($request, $sock);
 
 	} else {
 		my $local_path = $opts->to_local_path($request->{PATH});
@@ -113,8 +117,8 @@ sub respond {
 		} elsif (-f $local_path) {
 			
 			$local_path =~ /\.([\w]+)$/;
-			my $suffix = lc $1 || '';
-			$response = exists $mapped->{$suffix} ?
+			my $suffix = lc ($1 || '');
+			$response = ref $mapped->{$suffix} eq 'CODE' ?
 				$mapped->{$suffix}->($local_path, $request, $sock) : 
 				$opts->serve_file($local_path, $opts->{mime_types}->{$suffix}, $request);
 
@@ -132,7 +136,6 @@ sub to_local_path {
 	my @segments;
 	my $root;
 
-
 	# collapse segments
 	for my $segment (split '/', $path, -1) {
 		next if $segment eq '.';
@@ -141,7 +144,7 @@ sub to_local_path {
 	}
 	@segments = map { unescape($_) } @segments;
 	@segments = map { encode($opts->{code_page}, decode('utf8', $_)) } @segments;
-	shift @segments;
+	shift @segments unless $segments[0];
 
 	$root = $opts->{root_overrides}->{$segments[0]};
 	defined $root ? shift @segments : ($root = $opts->{doc_root});
@@ -163,9 +166,6 @@ sub start {
 		unmapped_responses => {},
 		mapped_responses => {}, 
 		mime_type_db   => 'mime-types/mime.dbm',
-		secret_orders  => {
-			stop => sub { exit(); }
-		},
 		@_
 	}, __PACKAGE__;
 
@@ -231,19 +231,15 @@ sub start {
 							given ($req->{METHOD}) {
 								when ('GET')  { push @reception, $sock; }
 								when ('POST') {
-									if (defined $req->{'content-length'}) {
+									if (
+										defined $req->{'content-length'} 
+										&& $req->{'content-length'} <= POST_MAX
+									) {
 										$read{$key} = $sock;
 										$req->{CONTENT} = $$read;
+									} else {
+										push @reception, $sock;
 									}
-								}
-								when ('MSG') {
-									my ($fh, $msg);
-									open  $fh, '<', '.msg';
-									$msg = <$fh>;
-									close $fh;
-									open  $fh, '>', '.msg';
-									close $fh;
-									$opts->{secret_orders}->{$msg}->() if ref $opts->{secret_orders}->{$msg} eq 'CODE';
 								}
 								default {
 									say $sock 'unknown method';
@@ -252,11 +248,15 @@ sub start {
 							}
 
 						} else {
-							say $sock 'cannot understand your request';
+							say $sock 'bad header';
 							push @trash, $sock;
 
 						}
 
+					}
+					if (length $$read > HEADER_LINE_MAX_LEN) {
+						say $sock 'too long header';
+						push @trash, $sock;
 					}
 
 				} else {

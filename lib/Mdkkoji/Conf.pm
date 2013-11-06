@@ -5,8 +5,10 @@ use strict;
 use warnings;
 use DBI;
 use Encode qw/ encode decode /;
+use Getopt::Long;
 
-our $path = $ENV{MDKKOJI_CONFIG_PATH} || 'config.pl';
+GetOptions('config=s', \(our $path));
+$path = 'config.pl' unless defined $path;
 
 sub load {
 	my %conf = (do $path);

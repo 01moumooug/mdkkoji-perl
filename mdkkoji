@@ -8,14 +8,21 @@ use FindBin;
 use Pod::Usage;
 use Cwd qw/ abs_path /;
 use Getopt::Long;
+use File::Spec;
 
-GetOptions('config=s', \(my $path));
-$ENV{MDKKOJI_CONFIG_PATH} = $path ? abs_path($path) : 'config.pl';
+use lib File::Spec->catdir($FindBin::RealBin, 'lib');
+use Mdkkoji::Conf;
+
 
 chdir $FindBin::RealBin;
+my %conf = Mdkkoji::Conf::load;
 
 given(shift) {
-	when ('start')  { exec($^X, 'start.pl') }
+	when ('start')  {
+		say "The server will be running at: ".$conf{port};
+		exec("$^X start.pl&")
+	}
+	when ('status') { exec($^X, 'status.pl') }
 	when ('init')   { exec($^X, 'init.pl') }
 	when ('stop')   { exec($^X, 'stop.pl') }
 	when ('update') { exec($^X, 'update.pl') }
@@ -38,7 +45,7 @@ mdkkoji [ I<options> ] [ I<commands> ]
 
 =head1 DESCRIPTION
 
-Program for organizing markdown documents.
+Perl script for organizing markdown documents.
 
 =head2 Commands
 
@@ -66,7 +73,7 @@ Update database.
 
 =over 25
 
-=item C<--config [filename]>
+=item C<--config=[filename]>
 
 run with specified config file
 

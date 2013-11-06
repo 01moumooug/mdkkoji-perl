@@ -8,7 +8,6 @@ use lib 'lib';
 use Mdkkoji::Conf;
 use Mdkkoji::Template;
 
-
 my %conf = Mdkkoji::Conf::load;
 
 for (keys $conf{templates}) {

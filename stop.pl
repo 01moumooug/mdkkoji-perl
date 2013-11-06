@@ -13,8 +13,7 @@ my $conn = IO::Socket::INET->new(
 	Proto => 'tcp'
 ) or exit;
 
-open  MSG, '>', '.msg';
-print MSG 'stop';
-close MSG;
-
-print {$conn} 'MSG / HTTP/1.1'.$CRLF.$CRLF;
+print {$conn} 'GET /pid HTTP/1.1'.$CRLF.$CRLF;
+my $pid = <$conn>;
+chomp $pid;
+kill 'TERM', $pid;

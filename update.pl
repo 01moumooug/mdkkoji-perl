@@ -17,7 +17,7 @@ use lib catdir($FindBin::RealBin, 'lib');
 use Mdkkoji::Document;
 use Mdkkoji::Conf;
 
-chdir $FindBin::RealBin;
+# chdir $FindBin::RealBin;
 
 my %conf = Mdkkoji::Conf::load;
 my $dbh = Mdkkoji::Conf::DBI(\%conf);

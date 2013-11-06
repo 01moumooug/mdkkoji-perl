@@ -34,7 +34,8 @@ Mdkkoji::Server::start(
 	doc_root  => $conf{doc_root},
 	root_overrides => { %{$conf{root_overrides}}, theme => $conf{theme} }, 
 	unmapped_responses => {
-		
+		'/hello' => sub { say 'hello' }, 
+		'/pid'   => sub { say $$ }
 	}, 
 	mapped_responses => {
 		DIR => sub {
@@ -44,8 +45,10 @@ Mdkkoji::Server::start(
 			)->set_fields(
 				r => $conf{recursive}, 
 				pg => 0,
+				dir => $request->{PATH}, 
 				%{parse_query($request->{QUERY})}
 			);
+
 			my $list = Mdkkoji::DocList->new(
 				Mdkkoji::Conf::DBI(\%conf),
 				$query->fields,
@@ -60,18 +63,28 @@ Mdkkoji::Server::start(
 				});
 			}
 			
-			my @dirs;
+			my $dirs = {};
+			find(sub {
+				if (-d $_) {
+					$dirs->{$_} = 1 if substr($_, 0, 1) ne '.';
+					$File::Find::prune = 1 unless $_ eq '.';
+				}
+			}, $local_path);
+			@{$dirs}{keys $conf{root_overrides}} = 1 if $request->{PATH} eq '/';
+			$dirs = [ keys $dirs ];
+
+			$query->set_fields(dir => undef);
 			header(200, 'Content-Type' => 'text/html');
-			$conf{templates}->{list}->($request, $query, $list, \@dirs);
+			$conf{templates}->{list}->($request, $query, $list, $dirs);
+
 		}, 
-		lc $conf{suffix} => sub {
+		substr(lc $conf{suffix}, 1) => sub {
 			my ($local_path, $request) = @_;
 			header(200, 'Content-Type' => 'text/html');
 			$conf{templates}->{view}->($request, $local_path);
 		}, 
-		pl => sub {
-
-		}
+		pl => sub {},
+		tpl => sub { header(404); },
 	}, 
 );
 

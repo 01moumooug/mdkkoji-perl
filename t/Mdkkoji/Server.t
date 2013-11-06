@@ -39,12 +39,9 @@ if ($pid == 0) {
 		port      => $conf{port}, 
 		doc_root  => catfile(qw/ t Mdkkoji sample-docs /), 
 		code_page => $conf{code_page}, 
-		response  => sub {
-			my ($path, $request, $socket)= @_;
-			given($request->{PATH}) {
-				when ('/hello') { print $hello }
-				when ('/exit')  { exit; }
-			}
+		unmapped_responses => {
+			'/hello' => sub { print {$_[1]} $hello }, 
+			'/exit'  => sub { &exit }
 		}
 	);
 	exit;
