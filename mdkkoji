@@ -8,13 +8,9 @@ use warnings;
 use strict;
 
 use Pod::Usage;
-use Cwd qw/ abs_path /;
-use Getopt::Long;
-use File::Spec;
 
 use lib 'lib';
 use Mdkkoji::Conf;
-
 my %conf = Mdkkoji::Conf::load;
 
 print <<WARNING if $Mdkkoji::Conf::path eq 'config.pl.sample';
@@ -53,15 +49,11 @@ mdkkoji
 
 =head1 SYNOPSIS
 
-mdkkoji [ I<options> ] [ I<commands> ]
+mdkkoji [ I<commands> ]
 
 =head1 COMMANDS
 
 init start stop restart status update
-
-=head1 OPTIONS
-
---config I<path>
 
 =head1 EXAMPLES
 
