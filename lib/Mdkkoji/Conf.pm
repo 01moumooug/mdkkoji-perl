@@ -9,6 +9,7 @@ use Getopt::Long;
 
 GetOptions('config=s', \(our $path));
 $path = 'config.pl' unless defined $path;
+$path = 'config.pl.sample' unless -f $path;
 
 sub load {
 	my %conf = (do $path);
