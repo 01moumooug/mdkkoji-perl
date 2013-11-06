@@ -18,6 +18,7 @@ sub load {
 		push @names, $field;
 		$defaults{$field} = $default;
 	}
+	$conf{suffix} =~ s/^\.//;
 	$conf{doc_root} = encode($conf{code_page}, $conf{doc_root});
 	$conf{root_overrides}->{$_} = encode($conf{code_page}, $conf{root_overrides}->{$_}) for keys $conf{root_overrides};
 	$conf{idx_fields} = \@names;
