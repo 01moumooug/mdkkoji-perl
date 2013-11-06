@@ -16,6 +16,10 @@ use Mdkkoji::Conf;
 chdir $FindBin::RealBin;
 my %conf = Mdkkoji::Conf::load;
 
+print <<WARNING if $Mdkkoji::Conf::path eq 'config.pl.sample';
+예제용 파일인 config.pl.sample을 사용합니다. config.pl.sample을 참고하여 config.pl를 만들거나 --config 옵션으로 지정한 파일이 존재하는지 확인해보세요
+WARNING
+
 given(shift) {
 	when ('start')  {
 		say "starting the server at $conf{port}...";
