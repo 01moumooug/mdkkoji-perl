@@ -19,7 +19,7 @@ my %conf = Mdkkoji::Conf::load;
 
 given(shift) {
 	when ('start')  {
-		say "starting server at: ".$conf{port};
+		say "starting the server at $conf{port}...";
 		exec("$^X start.pl&")
 	}
 	when ('status') { exec($^X, 'status.pl') }
