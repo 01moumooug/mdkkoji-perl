@@ -7,7 +7,7 @@ title => 'Mdkkoji',
 port => 8080, 
 
 # 색인할 문서의 확장자
-suffix => '.md', 
+suffix => 'md', 
 
 # 문서의 첫번째 줄에서 제목 필드 대신 사용할 수 있는 표시. 
 title_marker => '# ', 

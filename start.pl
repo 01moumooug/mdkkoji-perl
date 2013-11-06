@@ -78,7 +78,7 @@ Mdkkoji::Server::start(
 			$conf{templates}->{list}->($request, $query, $list, $dirs);
 
 		}, 
-		substr(lc $conf{suffix}, 1) => sub {
+		$conf{suffix} => sub {
 			my ($local_path, $request) = @_;
 			header(200, 'Content-Type' => 'text/html');
 			$conf{templates}->{view}->($request, $local_path);

@@ -102,14 +102,14 @@ QUERY
 		$sth = $dbh->prepare('INSERT INTO tmp_entries (ref, path, mtime) VALUES (?, ?, ?)');
 		my $dir_walker = sub {
 			my ($root, $override) = @_;
-			
+			my $suffix = quotemeta($conf{suffix});
 			return unless -d $root;
 			find ({
 				wanted => sub {
 
 					$File::Find::prune = 1 if /^\.(.)/;
 			 		return if -d;
-			 		return unless /\Q$conf{suffix}\E$/;
+			 		return unless /\.$suffix$/;
 
 			 		my $path = $File::Find::name;
 			 		my @segments = splitdir(abs2rel($path, $root));
