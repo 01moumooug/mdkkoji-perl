@@ -75,13 +75,13 @@ Mdkkoji::Server::start(
 
 			$query->set_fields(dir => undef);
 			header(200, 'Content-Type' => 'text/html');
-			$conf{templates}->{list}->($request, $query, $list, $dirs);
+			eval { $conf{templates}->{list}->($request, $query, $list, $dirs); } or print $@;
 
 		}, 
 		$conf{suffix} => sub {
 			my ($local_path, $request) = @_;
 			header(200, 'Content-Type' => 'text/html');
-			$conf{templates}->{view}->($request, $local_path);
+			eval { $conf{templates}->{view}->($request, $local_path); } or print $@;
 		}, 
 		pl => sub {},
 		tpl => sub { header(404); },
