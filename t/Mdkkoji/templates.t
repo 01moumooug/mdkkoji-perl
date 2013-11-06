@@ -11,7 +11,7 @@ use Mdkkoji::Template;
 my %conf = Mdkkoji::Conf::load;
 
 for (keys $conf{templates}) {
-	my $code = eval Mdkkoji::Template::compile($conf{templates}->{$_}) or say $@;
+	my $code = eval Mdkkoji::Template::compile($conf{theme}, $conf{templates}->{$_}) or say $@;
 	ok($code, "$_ compiles");
 }
 

@@ -24,7 +24,7 @@ use Mdkkoji::Util qw/ build_query build_query_pair /;
 chdir $FindBin::RealBin;
 
 my %conf = Mdkkoji::Conf::load;
-$conf{templates}->{$_} = eval Mdkkoji::Template::compile(File::Spec->catfile($conf{theme}, $conf{templates}->{$_}))
+$conf{templates}->{$_} = eval Mdkkoji::Template::compile($conf{theme}, $conf{templates}->{$_})
 	or die "load failed to load $_: $@"
 		for keys $conf{templates};
 

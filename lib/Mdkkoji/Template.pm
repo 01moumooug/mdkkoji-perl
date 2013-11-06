@@ -3,6 +3,7 @@ package Mdkkoji::Template;
 use v5.14;
 use strict;
 use warnings;
+use File::Spec;
 
 sub _add_slashes {
 	my $s = $_[0];
@@ -12,8 +13,8 @@ sub _add_slashes {
 }
 
 sub compile {
-
-	my $src = shift;
+	my ($dir, $src) = @_;
+	$src = File::Spec->catfile($dir, $src);
 	undef local $/;
 	open my $fh, '<', $src or die "failed to open template source: $src, $!";
 
