@@ -46,38 +46,30 @@ mdkkoji
 
 mdkkoji [ I<options> ] [ I<commands> ]
 
-=head1 DESCRIPTION
+=head1 COMMANDS
 
-Perl script for organizing markdown documents.
+init start stop restart status update
 
-=head2 Commands
+=head1 OPTIONS
 
-=over 10
+--config I<path>
 
-=item C<init>
+=head1 EXAMPLES
 
-Test configuration and initialize database. 
+=head2 처음 실행, 혹은 DB초기화
 
-=item C<start>
+  mdkkoji init
 
-Start mdkkoji server.
+=head2 서버 켜기/끄기/재시작
 
-=item C<stop>
+  mdkkoji start
+  mdkkoji stop
+  mdkkoji restart
 
-Stop mdkkoji server.
+=head3 서버 상태 확인
 
-=item C<update>
+  mdkkoji status
 
-Update database.
+=head4 문서 색인
 
-=back
-
-=head2 Options
-
-=over 25
-
-=item C<--config=[filename]>
-
-run with specified config file
-
-=back
+  mdkkoji update
