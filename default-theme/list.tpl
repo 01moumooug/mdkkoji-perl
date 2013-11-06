@@ -92,7 +92,7 @@
 			<div class='side-section'>
 				[% if ($query->fields('r')) { %]
 					<a href="?[% print build_query($query->clone->set_fields(r => 0, pg => 0)->fields); %]">
-						Directory
+						By directory
 					</a>
 				[% } else { %]
 					<a href="?[% print build_query($query->clone->set_fields(r => 1, pg => 0)->fields); %]">
