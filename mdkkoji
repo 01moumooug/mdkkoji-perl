@@ -1,19 +1,20 @@
 #!/usr/bin/env perl
-
+BEGIN {
+	use FindBin;
+	chdir $FindBin::RealBin;
+}
 use v5.14;
 use warnings;
 use strict;
 
-use FindBin;
 use Pod::Usage;
 use Cwd qw/ abs_path /;
 use Getopt::Long;
 use File::Spec;
 
-use lib File::Spec->catdir($FindBin::RealBin, 'lib');
+use lib 'lib';
 use Mdkkoji::Conf;
 
-chdir $FindBin::RealBin;
 my %conf = Mdkkoji::Conf::load;
 
 print <<WARNING if $Mdkkoji::Conf::path eq 'config.pl.sample';
@@ -26,7 +27,10 @@ given(shift) {
 		exec("$^X start.pl&")
 	}
 	when ('status') { exec($^X, 'status.pl') }
-	when ('init')   { exec($^X, 'init.pl') }
+	when ('init')   {
+		system($^X, $0, 'stop');
+		exec($^X, 'init.pl')
+	}
 	when ('stop')   { exec($^X, 'stop.pl') }
 	when ('update') { exec($^X, 'update.pl') }
 	when ('restart') {
