@@ -47,10 +47,12 @@ root_overrides => {
 # 템플릿, css 등이 담긴 디렉토리. 여기 있는 문서는 색인되지 않습니다
 theme => 'default-theme',
 
-# 템플릿 파일의 경로
+# 템플릿 파일 이름. theme 옵션으로 지정한 디렉토리에서 찾습니다.
 templates => {
 	list => 'list.tpl',
-	view => 'view.tpl'
+	view => 'view.tpl',
+	# default-theme에서 마크다운 확장을 쓰려면(Text::MultiMarkdown 모듈 필요): 
+	# view => 'view-multimarkdown.tpl' 
 },
 
 # 시간 필드에서 사용할 시간 형식. 첫번째 형식이 자동 생성되는
