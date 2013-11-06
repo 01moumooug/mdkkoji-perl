@@ -17,3 +17,4 @@ print {$conn} 'GET /pid HTTP/1.1'.$CRLF.$CRLF;
 my $pid = <$conn>;
 chomp $pid;
 kill 'TERM', $pid;
+say "killed the server.";
