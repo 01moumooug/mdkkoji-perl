@@ -68,19 +68,6 @@ a:hover {
 .fields--view {
 	text-align: center;
 }
-.set-link:hover:after {
-	content: "+";
-}
-.unset-link:link {
-	font-weight: bold;
-	color: #05a;
-}
-.unset-link:hover {
-	color: #f00;
-}
-.unset-link:hover:after {
-	content: "-";
-}
 .title {
 	text-align: center;
 }
@@ -93,6 +80,23 @@ a:hover {
 .side-section h3 {
 	color: #ab0;
 	border-bottom: 2px solid #efb;
+}
+a.set-link:visited {
+	color: #3be;
+}
+a.set-link:hover:after {
+	content: "+";
+}
+a.unset-link:link,
+a.unset-link:visited {
+	font-weight: bold;
+	color: #05a;
+}
+a.unset-link:hover {
+	color: #f00;
+}
+a.unset-link:hover:after {
+	content: "-";
 }
 .main-inner {
 	margin-right: 1em;
