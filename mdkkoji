@@ -19,6 +19,7 @@ WARNING
 
 given(shift) {
 	when ('start')  {
+		system($^X, 'update.pl');
 		say "starting the server at $conf{port}...";
 		exec("$^X start.pl&")
 	}
