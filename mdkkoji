@@ -14,7 +14,7 @@ use Mdkkoji::Conf;
 my %conf = Mdkkoji::Conf::load;
 
 print <<WARNING if $Mdkkoji::Conf::path eq 'config.pl.sample';
-예제용 파일인 config.pl.sample을 사용합니다. config.pl.sample을 참고하여 config.pl를 만드세요
+예제용 파일인 config.pl.sample을 설정 파일로 사용합니다. config.pl.sample을 참고하여 config.pl를 만드세요
 WARNING
 
 given(shift) {
