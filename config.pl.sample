@@ -63,6 +63,12 @@ time_fmt => [
 	'%Y년 %m월 %d일',
 ],
 
+# 
+parse_rules => [
+	[ '\G(.+)[ \t]*\n=+[ \t]*\n+'   => 'title' ],
+	[ '\G\#[ \t]*(.+?)[ \t]*\#*\n+' => 'title' ],
+],
+
 dbi => {
 	# DBI 생성자에 넘길 인자 목록 
 	args => ['dbi:SQLite:dbname=mdkkoji.db','','', { RaiseError => 1 }],
