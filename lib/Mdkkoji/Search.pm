@@ -55,9 +55,7 @@ sub doit {
 	my $excerpt;
 	my $center = pick(map {@$_} values %pos);
 	if (defined $center) {
-		
 		my $begin;
-
 		$begin = $center - EXCERPT_LEN / 2;
 		$begin = 0 unless $begin >= 0;
 
@@ -73,6 +71,7 @@ sub doit {
 			$excerpt =~ s{($quoted)}{<b>$1</b>}gi;
 		}
 		$excerpt = encode('utf8', $excerpt);
+
 	} else {
 		$excerpt = '';
 	}
