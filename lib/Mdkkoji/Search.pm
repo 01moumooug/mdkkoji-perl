@@ -51,9 +51,11 @@ sub doit {
 		$score = $sqr_sum ? ( $sum * $sum / $sqr_sum - 1 + $sum ) ** ($title_matches + 1) : 0;
 	}
 
+	# make excerpt
 	my $excerpt;
-	{ # make excerpt
-		my $center = pick(map {@$_} values %pos);
+	my $center = pick(map {@$_} values %pos);
+	if (defined $center) {
+		
 		my $begin;
 
 		$begin = $center - EXCERPT_LEN / 2;
@@ -71,6 +73,8 @@ sub doit {
 			$excerpt =~ s{($quoted)}{<b>$1</b>}gi;
 		}
 		$excerpt = encode('utf8', $excerpt);
+	} else {
+		$excerpt = '';
 	}
 	
 	return ($score, $excerpt);
