@@ -19,8 +19,8 @@ sub new {
     $self = bless {(
         array_fields => [], 
         fields       => {},
+        parse_rules  => [], 
         bullet       => '-',
-        title_marker => '# '
     ), @_}, $class;
 
     $self->{array_fields} = { map { lc $_ => 1 } @{$self->{array_fields}} };
@@ -31,26 +31,20 @@ sub new {
 }
 
 sub read {
-
     my ($self, $path) = @_;
-
     open my $fh, '<:crlf', $path || $self->{path} or warn "cannot open $path: $!" and return;
-    
     $self->{path} = $path;
-    
-    my @fields = parse_head($fh, $self->{title_marker}, keys $self->{array_fields});
-
-    local $/ = undef;
-    $self->{_body} = <$fh> || '';
-
+    undef local $/;
+    my ($field_list, $body, $extracts) = parse_head(<$fh>, $self->{parse_rules});
+    my ($ord, $fields) = ([], {});
     my ($field, $value);
-    while (($field, $value, @fields) = @fields) {
-        CORE::push @{$self->{_ord}}, $field;
-        $self->{fields}->{$field} = $value;
+    while (($field, $value, @$field_list) = @$field_list) {
+        $ord = [ grep { $_ ne $field } @$ord ] if (exists $fields->{$field});
+        CORE::push @$ord, $field;
+        $fields->{$field} = exists $self->{array_fields}->{$field} ? [ unique(parse_values($value)) ] : $value; 
     }
-
+    @{$self}{qw| fields _ord _body _extracts |} = ($fields, $ord, $body, $extracts);
     return $self;
-
 }
 
 sub set_fields {
@@ -63,10 +57,9 @@ sub set_fields {
                 $value = [ parse_values($value) ] unless ref $value eq 'ARRAY';
                 $value = [ unique(@$value) ];
             }
-
             CORE::push (@{$self->{_ord}}, $field) unless exists $self->{fields}->{$field};
-
             $self->{fields}->{$field} = $value;
+
         } else {
             delete $self->{fields}->{$field};
             $self->{_ord} = [grep { $_ ne $field } @{$self->{_ord}}];
@@ -81,11 +74,9 @@ sub fields {
     if (scalar @_) {
         return wantarray ? 
             grep { defined $_ } map {
-                if ($self->{array_fields}->{$_}) {
-                    exists $self->{fields}->{$_} ? @{$self->{fields}->{$_}} : undef;
-                } else {
-                    exists $self->{fields}->{$_} ? $self->{fields}->{$_} : undef;
-                }
+                $self->{array_fields}->{$_} ?
+                    ( exists $self->{fields}->{$_} ? @{$self->{fields}->{$_}} : undef ):
+                    ( exists $self->{fields}->{$_} ?   $self->{fields}->{$_}  : undef );
             } @_ :
             $self->{fields}->{(shift)};
     } else {
@@ -95,8 +86,7 @@ sub fields {
 
 sub push {
     my ($self, $field, @values) = @_;
-    @values = grep { defined $_; } @values;
-    
+    @values = grep { defined $_ } @values;
     if (scalar @values && $self->{array_fields}->{$field}) {
         if (ref $self->{fields}->{$field} ne 'ARRAY') {
             $self->{fields}->{$field} = [];
@@ -114,7 +104,7 @@ sub pull {
         if (ref $self->{fields}->{$field} eq 'ARRAY') {
             $self->{fields}->{$field} = [ grep { !$targets{$_} } @{$self->{fields}->{$field}} ];
             $self->set_fields($field => undef) unless scalar @{$self->{fields}->{$field}};
-        } 
+        }
     }
     return $self;
 }
@@ -127,7 +117,7 @@ sub write {
     my $path = shift || $self->{path};
     my $fh;
 
-    return unless $path;
+    warn 'cannot write to file. path is undefined.' and return unless $path;
 
     my $field_ord = [@_] || $self->{_ord};
 
@@ -145,34 +135,26 @@ sub _make_head {
 	my @fields = @{$self->{_ord}};
     my $head = '';
 
-    # if the first field is 'title' and title marker is defined
-    # than format the title field by the title marker
-    if (
-        defined $self->{title_marker} &&
-        $fields[0] && $fields[0] eq 'title'
-    ) {
-        $head .= sprintf("%s%s\n", 
-            $self->{title_marker},
-            $self->{fields}->{title}
-        );
-        shift @fields;
-    }
-
-    # format other headers
-    for my $name (@fields) {
+    for my $field (@fields) {
         
         my $val;
-
-        $val = $self->{fields}->{$name} or next;
+        $val = $self->{fields}->{$field} or next;
         $val = build_line(@$val) if ref($val) eq 'ARRAY';
-        $head .= sprintf("%s %s: %s\n",
-            substr($self->{bullet}, 0, 1),
-            ucfirst($name),
-            $val
-        );
+
+        if (exists $self->{_extracts}->{$field}) {
+            my $old_val = quotemeta $self->{_extracts}->{$field}->[0];
+            $self->{_extracts}->{$field}->[1] =~ s/$old_val/$val/;
+            $head .= $self->{_extracts}->{$field}->[1];
+
+        } else {
+            $head .= sprintf("%s %s: %s\n",
+                substr($self->{bullet}, 0, 1),
+                ucfirst($field),
+                $val
+            );
+        }
 
     }
-    $head .= "\n" if $fields[0];
 
     return $head;
 }
@@ -183,53 +165,38 @@ sub body  { $_[0]->{_body} }
 
 sub parse_head {
 
-    my $input = shift;
-    my $title_marker = shift || '# ';
-    my @array_fields = map(lc, @_);
-    my $head;
+    my $src = shift;
+    my (@fields, $body, %extracts);
 
-    if (ref $input eq 'GLOB') {
-        seek($input, 0, 0);
-        local $/ = "\n\n";
-        $head = <$input>;
-    } else {
-        $head = $input;
-    }
-
-    defined $head or return ();
-    
     # remove BOM!
-    $head =~ s/^(?:\357\273\277|\377\376\0\0|\0\0\376\377|\376\377|\377\376)//g;
-        
-    my @lines  = split /\n/, $head;
-    my @fields = ();
+    $src =~ s/^(?:\357\273\277|\377\376\0\0|\0\0\376\377|\376\377|\377\376)//g;
 
-    my $patt = qr/^([-*+]\s+)?(\w+):\s+?(.+)$/m;
-
-    # read the first line as title field 
-    # if the line begins with title marker
-    my $has_title_marker;
-    if ($title_marker && $lines[0] =~ /^$title_marker(.+?)$/) {
-        CORE::push (@fields, ('title', $1));
-        $has_title_marker = 1;
+    my $failed = 0;
+    my $rules = shift || [];
+    until ($failed) {
+        my $try_field_match = 1;
+        for my $rule (@$rules) {
+            if ($src =~ /$rule->[0]/gcp) {
+                my $value = $1 || '';
+                $extracts{$rule->[1]} = [ $value, ${^MATCH} ];
+                CORE::push @fields, ($rule->[1] => $value);
+                $try_field_match = 0;
+                last;
+            }
+        }
+        if ($try_field_match) {
+            if ($src =~ /\G[-+*][\t ]+(\w+)[\t ]*?:\s+(.+?)\n/gcp) {
+                my $field = lc $1;
+                CORE::push @fields, ($field => $2);
+                delete $extracts{$field};
+                $failed = 0;
+            } else {
+                $failed = 1;
+            }
+        }
     }
-
-    for (@lines) {
-
-        $_ =~ $patt or next;
-        my $key = lc($2);
-        next if $has_title_marker && $key eq 'title';
-        CORE::push @fields, $key;
-        CORE::push @fields, $key ~~ @array_fields ? [ unique(parse_values($3)) ] : $3;
-
-    }
-
-
-    # rewind if no head fields is found
-    seek($input, 0, 0) if ref $input eq 'GLOB' && !scalar @fields;
-
-    return @fields;
-
+    $body = substr($src, pos($src) || 0);
+    return (\@fields, $body, \%extracts);
 }
 
 # returns title of the document
@@ -256,15 +223,16 @@ sub title {
 sub clone {
     my $self = shift;
     my $copy = bless {}, ref $self;
-    my @shallow_things = qw/ path title_marker bullet _body /;
+    my @shallow_things = qw/ path bullet _body /;
 
     @{$copy}{@shallow_things} = @{$self}{@shallow_things};
     $copy->{array_fields} = { map { $_ => 1 } keys $self->{array_fields} };
     $copy->{_ord} = [ @{$self->{_ord}} ];
+    $copy->{_extracts} = { map { $_ => [@{$self->{_extracts}->{$_}}] } keys $self->{_extracts} }
+        if defined $self->{_extracts};
+    $copy->{parse_rules} = [ @{$self->{parse_rules}} ];
 
-    my ($key, $val);
-    my %fields = %{$self->fields};
-    while (($key, $val) = each %fields) {
+    while (my ($key, $val) = each %{$self->fields}) {
         $copy->{fields}->{$key} = ref $val eq 'ARRAY' ? [ @$val ] : $val;
     }
     return $copy;

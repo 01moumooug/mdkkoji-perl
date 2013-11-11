@@ -48,7 +48,10 @@ my $last_update = ($dbh->selectrow_array(q{SELECT value FROM etc WHERE field = '
 
 		my ($ref, $path, $hash) = @_;
 
-		my $doc = Mdkkoji::Document->new($path, array_fields => $conf{idx_fields});
+		my $doc = Mdkkoji::Document->new($path,
+			array_fields => $conf{idx_fields}, 
+			parse_rules => $conf{parse_rules},
+		);
 		my $date;
 		my $sth;
 

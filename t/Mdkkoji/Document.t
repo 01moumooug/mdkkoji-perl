@@ -33,30 +33,12 @@ is_deeply(
 	'build_line() builds comma separated values'
 );
 
-my $header;
-
-$header = <<'SAMPLE';
-# This is title
-- Title: this field will be ignored
-SAMPLE
-is({Mdkkoji::Document::parse_head($header)}->{title}, 'This is title',
-	'parse_head() honors title marker'
-);
-
-$header = <<'SAMPLE';
-- Field: This is normal field
-- Tags: tag1, tag2, tag3
-SAMPLE
-is_deeply(
-	{Mdkkoji::Document::parse_head($header, undef, 'Tags')}->{tags},
-	['tag1', 'tag2', 'tag3'],
-	'parse_head() parses array fields well'
-);
-
+my $parse_rules = [[ qr/\G\#[ \t]*(.+?)[ \t]*\#*\n+/, 'title' ]];
 my %conf = (Mdkkoji::Conf::load);
 my $doc;
 $doc = Mdkkoji::Document->new(catfile(qw/ t Mdkkoji sample-docs generic-document.md /), 
-	array_fields => [qw| tags category |]
+	array_fields => [qw| tags category |], 
+	parse_rules => $parse_rules
 );
 is_deeply(
 	[$doc->fields('tags')],
@@ -101,8 +83,12 @@ $doc->write($out);
 
 open FH, '<', $out or die 'cannot open written input: '.$!;
 read(FH, my $char, 1);
+
 is($char, '#', 'title marker is retained in output file');
-$doc = Mdkkoji::Document->new($out, array_fields => [qw| tags category |]);
+$doc = Mdkkoji::Document->new($out,
+	array_fields => [qw| tags category |], 
+	parse_rules => $parse_rules
+);
 is_deeply(
 	$doc->fields,
 	{
@@ -148,7 +134,9 @@ is($doc->title($conf{code_page}), 'without-title',
 	'title() if no title field, properly decoded basename of file is regarded as title'
 );
 
-$doc = Mdkkoji::Document->new(catfile(qw/ t Mdkkoji sample-docs document-with-bom.md/));
+$doc = Mdkkoji::Document->new(catfile(qw/ t Mdkkoji sample-docs document-with-bom.md/), 
+	parse_rules => $parse_rules
+);
 is(
 	$doc->fields('field'), 'this is field',
 	'it seems that BOM does not interfere with head parsing'

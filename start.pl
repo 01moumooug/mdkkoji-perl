@@ -48,7 +48,6 @@ Mdkkoji::Server::start(
 				dir => $request->{PATH}, 
 				%{parse_query($request->{QUERY})}
 			);
-
 			my $list = Mdkkoji::DocList->new(
 				Mdkkoji::Conf::DBI(\%conf),
 				$query->fields,
@@ -56,13 +55,11 @@ Mdkkoji::Server::start(
 			if ($query->fields('search')) {
 				$list->filter(sub {
 					open my $fh, '<:encoding(utf8)', $_[0]->{path};
-					Mdkkoji::Document::parse_head($fh, $conf{title_marker});
-					local $/ = undef;
-					my $body = <$fh>;
+					undef local $/;
+					my $body = (Mdkkoji::Document::parse_head(<$fh>, $conf{parse_rules}))[1];
 					return Mdkkoji::Search::doit($body, $_[0]->{title}, $query->fields('search'));
 				});
 			}
-			
 			my $dirs = {};
 			find(sub {
 				if (-d $_) {
@@ -83,7 +80,9 @@ Mdkkoji::Server::start(
 			header(200, 'Content-Type' => 'text/html');
 			eval { $conf{templates}->{view}->($request, $local_path); } or print $@;
 		}, 
-		pl => sub {},
+		pl => sub {
+			eval { do $_[0]; } or print $@;
+		},
 		tpl => sub { header(404); },
 	}, 
 );

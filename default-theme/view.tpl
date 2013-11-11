@@ -3,7 +3,8 @@
 	use Text::Markdown 'markdown';
 
 	my $doc = Mdkkoji::Document->new($local_path,
-		array_fields => $conf{idx_fields}
+		array_fields => $conf{idx_fields},
+		parse_rules => $conf{parse_rules}
 	);
 %]
 <!doctype html>
