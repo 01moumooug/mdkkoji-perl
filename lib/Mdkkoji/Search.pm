@@ -13,7 +13,7 @@ use constant EXCERPT_LEN => 150;
 sub doit {
 
 	my ($body, $title, $queries) = @_;
-	my @queries = split /\s+/, decode('utf8', $queries);
+	my @queries = split /\s+/, lc(decode('utf8', $queries));
 	my (%pos, %score);
 	my $title_matches = 0;
 
