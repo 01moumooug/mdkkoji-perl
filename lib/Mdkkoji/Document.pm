@@ -153,8 +153,8 @@ sub _make_head {
                 $val
             );
         }
-
     }
+    $head .= "\n" unless $self->{_body} =~ /^\n/;
 
     return $head;
 }
