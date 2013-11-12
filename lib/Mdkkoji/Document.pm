@@ -117,14 +117,11 @@ sub write {
 
     my $self = shift;
     my $path = shift || $self->{path};
-    my $fh;
-
-    warn 'cannot write to file. path is undefined.' and return unless $path;
-
     my $field_ord = @_ ? [@_] : $self->{_ord};
-
-    open  $fh, '>', $path or warn "cannot write to: $!" and return;
-    print $fh $self->_make_head($field_ord).$self->{_body};
+    
+    my $h;
+    open  $h, '>', $path or warn "cannot write to: $!" and return;
+    print $h $self->_make_head($field_ord).$self->{_body};
 
     $self->{path} = $path;
 
