@@ -12,6 +12,7 @@ use Exporter qw/ import /;
 our @EXPORT_OK = qw/ parse_values unique build_line /;
 
 sub new {
+
 	my ($class, $path, $self);
     
     ($class, $path, @_) = @_;
@@ -21,6 +22,7 @@ sub new {
         fields       => {},
         parse_rules  => [], 
         bullet       => '-',
+        _ord         => [],
     ), @_}, $class;
 
     $self->{array_fields} = { map { lc $_ => 1 } @{$self->{array_fields}} };
@@ -119,7 +121,7 @@ sub write {
 
     warn 'cannot write to file. path is undefined.' and return unless $path;
 
-    my $field_ord = [@_] || $self->{_ord};
+    my $field_ord = @_ ? [@_] : $self->{_ord};
 
     open  $fh, '>', $path or warn "cannot write to: $!" and return;
     print $fh $self->_make_head($field_ord).$self->{_body};
