@@ -187,7 +187,7 @@ sub parse_head {
             }
         }
         if ($try_field_match) {
-            if ($src =~ /\G[-+*][\t ]+(\w+)[\t ]*?:\s+(.+?)\n/gcp) {
+            if ($src =~ /\G(?:[-+*][\t ]+)?(\w+)[\t ]*?:\s+(.+?)\n/gcp) {
                 my $field = lc $1;
                 CORE::push @fields, ($field => $2);
                 delete $extracts{$field};
