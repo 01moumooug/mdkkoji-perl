@@ -13,15 +13,14 @@ use lib 'lib';
 use Mdkkoji::Conf;
 my %conf = Mdkkoji::Conf::load;
 
-print <<WARNING if $Mdkkoji::Conf::path eq 'config.pl.sample';
-예제용 파일인 config.pl.sample을 설정 파일로 사용합니다. config.pl.sample을 참고하여 config.pl를 만드세요
-WARNING
+warn "config.pl not found. Using config.pl.sample..."
+	if $Mdkkoji::Conf::path eq 'config.pl.sample';
 
 given(shift) {
 	when ('start')  {
 		system($^X, 'update.pl');
 		say "starting the server at $conf{port}...";
-		exec("$^X start.pl&")
+		exec("$^X start.pl &")
 	}
 	when ('status') { exec($^X, 'status.pl') }
 	when ('init')   {
@@ -50,28 +49,26 @@ mdkkoji
 
 =head1 SYNOPSIS
 
-mdkkoji [ I<commands> ]
-
-=head1 COMMANDS
-
-init start stop restart status update
+B<mdkkoji [ commands ]>
 
 =head1 EXAMPLES
 
-=head2 처음 실행, 혹은 DB초기화
+=head2 initialize db
 
-  mdkkoji init
+B<mdkkoji init>
 
-=head2 서버 켜기/끄기/재시작
+=head2 start / stop / restart server
 
-  mdkkoji start
-  mdkkoji stop
-  mdkkoji restart
+B<mdkkoji start>
 
-=head3 서버 상태 확인
+B<mdkkoji stop>
 
-  mdkkoji status
+B<mdkkoji restart>
 
-=head4 문서 색인
+=head2 check status
 
-  mdkkoji update
+B<mdkkoji status>
+
+=head2 re-index documents
+
+B<mdkkoji update>
