@@ -20,7 +20,7 @@ title_marker => '# ',
 
 # 색인할 필드와 기본값. 기본값이 없으면 빈 문자열이나 undef
 idx_fields => [
-	tags => '(none)', 
+	keywords => '(none)', 
 	type => ''
 ],
 
