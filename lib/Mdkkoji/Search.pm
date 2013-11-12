@@ -19,6 +19,7 @@ sub doit {
 
 	$body =~ s/\s+/ /g;
 	$body =~ tr/A-Z/a-z/;
+	$title = decode('utf8', $title);
 	$title =~ tr/A-Z/a-z/;
 
 	# search
