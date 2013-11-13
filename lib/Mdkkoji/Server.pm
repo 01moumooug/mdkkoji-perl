@@ -155,6 +155,7 @@ sub to_local_path {
 sub start {
 
 	local $SIG{PIPE} = sub {};
+	local $SIG{CHLD} = 'IGNORE';
 	local $| = 1;
 	local $/ = $CRLF;
 
@@ -192,15 +193,17 @@ sub start {
 	while (1) {
 
 		# listen
-		my ($readable, $writable) = IO::Select->select($read_set, $write_set, undef, 1800);
-		last unless ($readable or $writable);
+		my ($readable, $writable) = IO::Select->select($read_set, undef, undef, 1800);
+		last unless $readable;
 
 		# read header
 		foreach my $sock (@$readable) {
 			if ($sock == $main_sock) {
 				my $client = $sock->accept();
-				@{$data{scalar $client}}{qw| req read_buff |} = ({}, '');
-				$read_set->add($client);
+				if (defined $client) {
+					@{$data{scalar $client}}{qw| req read_buff |} = ({}, '');
+					$read_set->add($client);
+				}
 
 			} else {
 
@@ -285,24 +288,23 @@ sub start {
 
 		# generate response
 		while (my $sock = pop @reception) {
-			my $key = scalar $sock;
 			$read_set->remove($sock);
-
-			if ($data{$key}->{RESPONSE} = $opts->respond($data{$key}->{req}, $sock)) {
-				$write_set->add($sock);
-
+			my $key = scalar $sock;
+			my $pid = fork();
+			if ($pid == 0) {
+				my $response = $opts->respond($data{$key}->{req}, $sock);
+				my $buff;
+				if (ref $response eq 'GLOB') {
+					while (sysread($response, $buff, 1024)) {
+						print $sock $buff;
+					}
+				}
+				close $sock;
+				exit;
 			} else {
 				push @trash, $sock;
 
 			}
-		}
-
-		# write response 
-		for (@$writable) {
-			my $buff;
-			sysread($data{scalar $_}->{RESPONSE}, $buff, 1024) ?
-				print $_ $buff :
-				push  @trash, $_ ;
 		}
 
 		# close socket
@@ -312,7 +314,6 @@ sub start {
 			$read_set->remove($sock);
 			close($sock);
 		}
-
 	}
 }
 
