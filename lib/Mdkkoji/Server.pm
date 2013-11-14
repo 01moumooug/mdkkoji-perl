@@ -185,7 +185,7 @@ sub start {
 		Blocking  => 0
 	) or die $!;
 
-	my ($read_set, $write_set) = (new IO::Select(), new IO::Select());
+	my $read_set = new IO::Select();
 	my (%read, %data, @reception, @trash);
 
 	$read_set->add($main_sock);
@@ -193,17 +193,15 @@ sub start {
 	while (1) {
 
 		# listen
-		my ($readable, $writable) = IO::Select->select($read_set, undef, undef, 1800);
+		my ($readable) = IO::Select->select($read_set, undef, undef, 1800);
 		last unless $readable;
 
 		# read header
 		foreach my $sock (@$readable) {
 			if ($sock == $main_sock) {
 				my $client = $sock->accept();
-				if (defined $client) {
-					@{$data{scalar $client}}{qw| req read_buff |} = ({}, '');
-					$read_set->add($client);
-				}
+				@{$data{scalar $client}}{qw| req read_buff |} = ({}, '');
+				$read_set->add($client);
 
 			} else {
 
@@ -310,7 +308,6 @@ sub start {
 		# close socket
 		while (my $sock = pop @trash) {
 			delete $data{scalar $sock};
-			$write_set->remove($sock);
 			$read_set->remove($sock);
 			close($sock);
 		}

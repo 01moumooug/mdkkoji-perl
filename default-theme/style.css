@@ -186,7 +186,12 @@ a.unset-link:hover:after {
 .content th {
 	background-color: #efb;
 }
-
+.content dt {
+	font-weight: bold;
+}
+.content dd {
+	margin-bottom: 1em;
+}
 @media print {
 	body {
 		font-size: 10pt;
