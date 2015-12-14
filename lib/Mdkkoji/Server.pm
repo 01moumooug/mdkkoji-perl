@@ -2,6 +2,7 @@ package Mdkkoji::Server;
 
 use v5.14;
 use strict;
+use feature "switch";
 use warnings;
 
 use constant {

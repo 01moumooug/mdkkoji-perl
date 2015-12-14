@@ -128,7 +128,7 @@ QUERY
 				}
 			}, $root);
 		};
-		$dir_walker->($conf{root_overrides}->{$_}, $_) for keys $conf{root_overrides};
+		$dir_walker->($conf{root_overrides}->{$_}, $_) for keys %{$conf{root_overrides}};
 		$dir_walker->($conf{doc_root});
 
 	}

@@ -5,6 +5,7 @@ BEGIN {
 }
 use v5.14;
 use warnings;
+use experimental qw/smartmatch/;
 use strict;
 
 use Pod::Usage;
@@ -16,7 +17,7 @@ my %conf = Mdkkoji::Conf::load;
 warn "config.pl not found. Using config.pl.sample..."
 	if $Mdkkoji::Conf::path eq 'config.pl.sample';
 
-given(shift) {
+for(shift) {
 	when ('start')  {
 		system($^X, 'update.pl');
 		say "starting the server at $conf{port}...";

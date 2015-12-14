@@ -225,9 +225,9 @@ sub clone {
     my @shallow_things = qw/ path bullet _body /;
 
     @{$copy}{@shallow_things} = @{$self}{@shallow_things};
-    $copy->{array_fields} = { map { $_ => 1 } keys $self->{array_fields} };
+    $copy->{array_fields} = { map { $_ => 1 } keys %{$self->{array_fields}} };
     $copy->{_ord} = [ @{$self->{_ord}} ];
-    $copy->{_extracts} = { map { $_ => [@{$self->{_extracts}->{$_}}] } keys $self->{_extracts} }
+    $copy->{_extracts} = { map { $_ => [@{$self->{_extracts}->{$_}}] } keys %{$self->{_extracts}} }
         if defined $self->{_extracts};
     $copy->{parse_rules} = [ @{$self->{parse_rules}} ];
 
